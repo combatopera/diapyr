@@ -18,7 +18,7 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-from di import DI, types
+from diapyr import DI, types
 
 class TestDI(unittest.TestCase):
 
