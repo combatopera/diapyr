@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright 2014 Andrzej Cichocki
 
 # This file is part of diapyr.
@@ -203,6 +201,3 @@ class TestDI(unittest.TestCase):
         self.assertEqual(['OK.start', 'BadStop.start'], events)
         di.stop()
         self.assertEqual(['OK.start', 'BadStop.start', "%s.%s" % (self.BadStop.__module__, self.BadStop.__name__), 'OK.stop'], events)
-
-if '__main__' == __name__:
-    unittest.main()

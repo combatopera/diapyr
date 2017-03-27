@@ -3,3 +3,4 @@ name = 'diapyr'
 projects = ()
 deps = ()
 years = 2014,
+pyversions = 2,
