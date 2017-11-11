@@ -137,7 +137,7 @@ class TestDI(unittest.TestCase):
         self.assertEqual(['A.start', 'B.start', 'B.stop', 'A.stop'], events)
 
     def test_startdoesnotinstantiatenonstartables(self):
-        class KaboomException: pass
+        class KaboomException(Exception): pass
         class Kaboom:
             @types()
             def __init__(self): raise KaboomException
@@ -153,7 +153,7 @@ class TestDI(unittest.TestCase):
 
     class BadStart(Eventful):
 
-        class BadStartException: pass
+        class BadStartException(Exception): pass
 
         def start(self): raise self.BadStartException
 
