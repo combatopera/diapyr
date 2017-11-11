@@ -1,4 +1,6 @@
 author = Andrzej Cichocki
 name = diapyr
 years += 2014
-pyversions += 2
+pyversions +=
+    2
+    3

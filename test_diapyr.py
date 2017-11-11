@@ -21,20 +21,25 @@ from diapyr import DI, types
 class TestDI(unittest.TestCase):
 
     def test_instances(self):
+        class Basestring:
+            def __init__(self, text): self.text = text
+            def __eq__(self, that): return self.text == that.text
+        class Str(Basestring): pass
+        class Unicode(Basestring): pass
         di = DI()
-        self.assertEqual([], di.all(str))
-        self.assertEqual([], di.all(unicode))
-        self.assertEqual([], di.all(basestring))
+        self.assertEqual([], di.all(Str))
+        self.assertEqual([], di.all(Unicode))
+        self.assertEqual([], di.all(Basestring))
         self.assertEqual([], di.all(list))
-        self.assertEqual((di.addinstance,), di.add('hmm'))
-        self.assertEqual(['hmm'], di.all(str))
-        self.assertEqual([], di.all(unicode))
-        self.assertEqual(['hmm'], di.all(basestring))
+        self.assertEqual((di.addinstance,), di.add(Str('hmm')))
+        self.assertEqual([Str('hmm')], di.all(Str))
+        self.assertEqual([], di.all(Unicode))
+        self.assertEqual([Str('hmm')], di.all(Basestring))
         self.assertEqual([], di.all(list))
-        self.assertEqual((di.addinstance,), di.add(u'hmmm'))
-        self.assertEqual(['hmm'], di.all(str))
-        self.assertEqual(['hmmm'], di.all(unicode))
-        self.assertEqual(['hmm', 'hmmm'], di.all(basestring))
+        self.assertEqual((di.addinstance,), di.add(Unicode('hmmm')))
+        self.assertEqual([Str('hmm')], di.all(Str))
+        self.assertEqual([Unicode('hmmm')], di.all(Unicode))
+        self.assertEqual([Str('hmm'), Unicode('hmmm')], di.all(Basestring))
         self.assertEqual([], di.all(list))
 
     def test_simpleinjection(self):
@@ -52,9 +57,14 @@ class TestDI(unittest.TestCase):
     def test_metaclass(self):
         di = DI()
         class HasVal(type): pass
-        class Impl:
-            __metaclass__ = HasVal
-            val = 'implval'
+        try:
+            localz = locals()
+            exec('class Impl(metaclass = HasVal): pass', globals(), localz)
+            Impl = localz['Impl']
+        except:
+            class Impl:
+                __metaclass__ = HasVal
+        Impl.val = 'implval'
         class Hmm:
             @types(HasVal)
             def __init__(self, hasval):
