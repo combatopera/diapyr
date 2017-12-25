@@ -23,12 +23,14 @@ log = logging.getLogger(__name__)
 class Started: pass
 
 def starter(startabletype):
+    typelabel = "%s.%s" % (startabletype.__module__, startabletype.__name__)
     class StartedImpl(Started):
         @types(startabletype)
         def __init__(self, startable):
+            log.debug("Starting: %s", typelabel)
             startable.start()
             self.startable = startable
         def dispose(self):
-            log.debug("Stopping: %s.%s", startabletype.__module__, startabletype.__name__)
+            log.debug("Stopping: %s", typelabel)
             self.startable.stop()
     return StartedImpl
