@@ -140,6 +140,11 @@ class DI:
                 self.typetosources[type] = [source]
         self.allsources.append(source)
 
+    def removesource(self, source):
+        for type in source.types:
+            self.typetosources[type].remove(source)
+        self.allsources.remove(source)
+
     def addclass(self, clazz):
         self.addsource(Class(clazz, self))
 
@@ -190,3 +195,7 @@ class DI:
     def stop(self):
         for source in reversed(self.allsources):
             source.tostopped()
+
+    def __del__(self):
+        while self.allsources:
+            self.removesource(self.allsources[-1])
