@@ -27,6 +27,8 @@ def types(*deptypes, **kwargs):
         return f
     return g
 
+class ManualStart: pass
+
 class Source:
 
     class Static: startable, stoppable = False, False
@@ -45,7 +47,7 @@ class Source:
         addtype(type)
         self.typelabel = "%s.%s" % (type.__module__, type.__name__)
         # We assume stop exists if start does:
-        self.lifecycle = self.Stopped if hasattr(type, 'start') else self.Static
+        self.lifecycle = self.Stopped if hasattr(type, 'start') and not issubclass(type, ManualStart) else self.Static
         self.di = di
 
     def tostarted(self):
