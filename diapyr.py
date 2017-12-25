@@ -77,6 +77,9 @@ class Instance(Source):
     def __call__(self):
         return self.instance
 
+    def discard(self):
+        pass
+
 class Creator(Source):
 
     def __init__(self, callable, di):
@@ -95,6 +98,11 @@ class Creator(Source):
                 args = [self.di(t) for t in deptypes]
             self.instance = self.callable(*args)
         return self.instance
+
+    def discard(self):
+        if self.instance is not None:
+            if hasattr(self.instance, 'dispose'): self.instance.dispose()
+            self.instance = None
 
 class Class(Creator):
 
@@ -196,6 +204,6 @@ class DI:
         for source in reversed(self.allsources):
             source.tostopped()
 
-    def __del__(self):
-        while self.allsources:
-            self.removesource(self.allsources[-1])
+    def discardall(self):
+        for source in reversed(self.allsources):
+            source.discard()
