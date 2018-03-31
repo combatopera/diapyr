@@ -1,0 +1,5 @@
+{|
+! master
+|-
+| [[Image:https://travis-ci.org/combatopera/diapyr.svg?branch=master]]
+|}
