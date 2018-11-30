@@ -17,4 +17,4 @@
 
 import setuptools
 
-setuptools.setup(name = 'diapyr')
+setuptools.setup(name = 'diapyr', packages = setuptools.find_packages())
