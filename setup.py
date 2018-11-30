@@ -1,1 +1,3 @@
+import setuptools
 
+setuptools.setup()
