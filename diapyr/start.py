@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
+from . import types
 import logging
-from diapyr import types
 
 log = logging.getLogger(__name__)
 
