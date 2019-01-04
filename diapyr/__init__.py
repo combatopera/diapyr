@@ -155,6 +155,9 @@ class DI:
 
     def addclass(self, clazz):
         self.addsource(Class(clazz, self))
+        if hasattr(clazz, 'start'):
+            from .start import starter
+            self.addclass(starter(clazz))
 
     def addinstance(self, instance):
         self.addsource(Instance(instance, self))
