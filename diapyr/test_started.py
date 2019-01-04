@@ -33,6 +33,5 @@ class TestStarted(unittest.TestCase):
                 self.resource = astarter.startable.resource
         di = DI()
         di.add(A)
-        di.add(starter(A))
         di.add(B)
         self.assertEqual('gotcha', di(B).resource)
