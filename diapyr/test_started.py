@@ -15,27 +15,24 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
-from diapyr import types
+from . import DI, types
+from .start import starter
+import unittest
 
-log = logging.getLogger(__name__)
+class TestStarted(unittest.TestCase):
 
-class Started: pass
-
-def starter(startabletype):
-    try:
-        return startabletype.di_starter
-    except AttributeError:
-        pass
-    typelabel = "%s.%s" % (startabletype.__module__, startabletype.__name__)
-    class StartedImpl(Started):
-        @types(startabletype)
-        def __init__(self, startable):
-            log.debug("Starting: %s", typelabel)
-            startable.start()
-            self.startable = startable
-        def dispose(self):
-            log.debug("Stopping: %s", typelabel)
-            self.startable.stop()
-    startabletype.di_starter = StartedImpl
-    return StartedImpl
+    def test_started(self):
+        class A:
+            @types()
+            def __init__(self): pass
+            def start(self):
+                self.resource = 'gotcha'
+        class B:
+            @types(starter(A))
+            def __init__(self, astarter):
+                self.resource = astarter.startable.resource
+        di = DI()
+        di.add(A)
+        di.add(starter(A))
+        di.add(B)
+        self.assertEqual('gotcha', di(B).resource)
