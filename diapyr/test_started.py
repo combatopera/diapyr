@@ -16,7 +16,7 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 from . import DI, types
-from .start import starter
+from .start import starter, Started
 import unittest
 
 class TestStarted(unittest.TestCase):
@@ -35,3 +35,14 @@ class TestStarted(unittest.TestCase):
         di.add(A)
         di.add(B)
         self.assertEqual('gotcha', di(B).resource)
+
+    def test_hierarchy(self):
+        class A:
+            @types()
+            def __init__(self): pass
+            def start(self): pass
+        class B(A): pass
+        di = DI()
+        di.add(A)
+        di.add(B)
+        self.assertEqual([A, B], [s.startable.__class__ for s in di.all(Started)])

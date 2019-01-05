@@ -24,13 +24,14 @@ class Started: pass
 
 def starter(startabletype):
     try:
-        return startabletype.di_starter
-    except AttributeError:
+        return startabletype.__dict__['di_starter']
+    except KeyError:
         pass
     typelabel = "%s.%s" % (startabletype.__module__, startabletype.__name__)
     class StartedImpl(Started):
-        @types(startabletype)
-        def __init__(self, startable):
+        @types([startabletype]) # TODO LATER: Shouldn't instantiate subtypes.
+        def __init__(self, startables):
+            startable, = (s for s in startables if s.__class__ == startabletype)
             log.debug("Starting: %s", typelabel)
             startable.start()
             self.startable = startable

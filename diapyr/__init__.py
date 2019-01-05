@@ -186,6 +186,9 @@ class DI:
         return [source() for source in self.typetosources.get(type, [])]
 
     def __call__(self, type, **kwargs):
+        if isinstance(type, list):
+            componenttype, = type
+            return self.all(componenttype) # XXX: Allow empty list?
         objs = self.all(type)
         if not objs and 'default' in kwargs:
             return kwargs['default']
