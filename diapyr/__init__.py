@@ -189,15 +189,15 @@ class DI:
     def all(self, type):
         return [source() for source in self.typetosources.get(type, [])]
 
-    def __call__(self, type, **kwargs):
-        if isinstance(type, list):
-            componenttype, = type
+    def __call__(self, clazz, **kwargs):
+        if list == type(clazz):
+            componenttype, = clazz
             return self.all(componenttype) # XXX: Allow empty list?
-        objs = self.all(type)
+        objs = self.all(clazz)
         if not objs and 'default' in kwargs:
             return kwargs['default']
         if 1 != len(objs):
-            raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (type, len(objs)))
+            raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (clazz, len(objs)))
         return objs[0]
 
     def start(self):
