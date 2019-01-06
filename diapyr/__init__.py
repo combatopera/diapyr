@@ -104,6 +104,8 @@ class Creator(Source):
             if hasattr(self.instance, 'dispose'): self.instance.dispose()
             self.instance = None
 
+class MissingAnnotationException(Exception): pass
+
 class Class(Creator):
 
     action = 'Instantiating'
@@ -118,7 +120,7 @@ class Class(Creator):
         try:
             return ctor.di_deptypes, defaults
         except AttributeError:
-            raise Exception("Missing types annotation: %s" % self.typelabel)
+            raise MissingAnnotationException("Missing types annotation: %s" % self.typelabel)
 
 class Factory(Creator):
 
@@ -131,6 +133,8 @@ class Factory(Creator):
     @staticmethod
     def getdeptypesanddefaults(factory):
         return factory.di_deptypes, inspect.getargspec(factory).defaults
+
+class UnsatisfiableRequestException(Exception): pass
 
 class DI:
 
@@ -193,7 +197,7 @@ class DI:
         if not objs and 'default' in kwargs:
             return kwargs['default']
         if 1 != len(objs):
-            raise Exception("Expected 1 object of type %s but got: %s" % (type, len(objs)))
+            raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (type, len(objs)))
         return objs[0]
 
     def start(self):
