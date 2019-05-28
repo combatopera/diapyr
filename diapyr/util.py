@@ -15,18 +15,22 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
+class Proxy(object):
+    def __getattr__(self, name):
+        try:
+            return getattr(self._enclosinginstance, name)
+        except AttributeError:
+            superclass = super(Proxy, self)
+            try:
+                supergetattr = superclass.__getattr__
+            except AttributeError:
+                raise AttributeError("'%s' object has no attribute '%s'" % (self._cls.__name__, name))
+            return supergetattr(name)
+
 def innerclass(cls):
     def getproxy(enclosinginstance):
-        class Inner(cls):
-            def __getattr__(self, name):
-                try:
-                    return getattr(enclosinginstance, name)
-                except AttributeError:
-                    superclass = super(Inner, self)
-                    try:
-                        supergetattr = superclass.__getattr__
-                    except AttributeError:
-                        raise AttributeError("'%s' object has no attribute '%s'" % (cls.__name__, name))
-                    return supergetattr(name)
+        class Inner(Proxy, cls):
+            _cls = cls
+            _enclosinginstance = enclosinginstance
         return Inner
     return property(getproxy)
