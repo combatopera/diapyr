@@ -21,6 +21,7 @@ import unittest
 class MyOuter:
 
     foo = 'hidden'
+    myprop = property(lambda self: self.baz, lambda self, value: setattr(self, 'baz', value))
 
     @innerclass
     class FancyInner(object):
@@ -64,3 +65,15 @@ class TestCommon(unittest.TestCase):
         with self.assertRaises(AttributeError) as cm:
             inner.quux
         self.assertEqual(("'PlainInner' object has no attribute 'quux'",), cm.exception.args)
+
+    def test_propertyaccess(self):
+        outer = MyOuter('hmm')
+        inner = outer.PlainInner()
+        self.assertEqual('hmm', outer.myprop)
+        self.assertEqual('hmm', inner.myprop)
+        outer.myprop = 'hmm2'
+        self.assertEqual('hmm2', outer.myprop)
+        self.assertEqual('hmm2', inner.myprop)
+        inner.myprop = 'hmm3'
+        self.assertEqual('hmm2', outer.myprop) # XXX: Possible to propagate value?
+        self.assertEqual('hmm3', inner.myprop)
