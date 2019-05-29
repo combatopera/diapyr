@@ -16,6 +16,7 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 class Proxy(object):
+
     def __getattr__(self, name):
         try:
             return getattr(self._enclosinginstance, name)
