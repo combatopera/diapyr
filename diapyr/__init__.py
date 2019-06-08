@@ -70,8 +70,8 @@ class Source:
 
 class Instance(Source):
 
-    def __init__(self, instance, di):
-        Source.__init__(self, instance.__class__, di)
+    def __init__(self, instance, type, di):
+        Source.__init__(self, type, di)
         self.instance = instance
 
     def __call__(self):
@@ -163,8 +163,8 @@ class DI:
             from .start import starter
             self.addclass(starter(clazz))
 
-    def addinstance(self, instance):
-        self.addsource(Instance(instance, self))
+    def addinstance(self, instance, type = None):
+        self.addsource(Instance(instance, instance.__class__ if type is None else type, self))
 
     def addfactory(self, factory):
         self.addsource(Factory(factory, self))
