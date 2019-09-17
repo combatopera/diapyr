@@ -1,3 +1,6 @@
 #gclean
 *.pyc
 *$py.class
+/build/
+/diapyr.egg-info/
+/dist/
