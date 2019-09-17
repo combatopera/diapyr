@@ -19,5 +19,5 @@ import setuptools
 
 setuptools.setup(
         name = 'diapyr',
-        version = '2-SNAPSHOT',
+        version = '2',
         packages = setuptools.find_packages())
