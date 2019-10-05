@@ -4,3 +4,5 @@
 /build/
 /diapyr.egg-info/
 /dist/
+/setup.cfg
+/setup.py
