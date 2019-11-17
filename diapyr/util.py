@@ -35,3 +35,6 @@ def innerclass(cls):
             _enclosinginstance = enclosinginstance
         return Inner
     return property(getproxy)
+
+def singleton(t):
+    return t()
