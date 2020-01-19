@@ -3,9 +3,9 @@ language: minimal
 addons:
   apt:
     packages:
-    - python3-pip
     - python3-pyparsing
 install:
+- curl https://bootstrap.pypa.io/get-pip.py | python3
 - pip --version
 - pip3 --version
 - git clone https://github.com/combatopera/aridity.git ../aridity
