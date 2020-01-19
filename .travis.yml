@@ -1,4 +1,5 @@
 dist: bionic
+language: minimal
 addons:
   apt:
     packages:
