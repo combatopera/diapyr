@@ -3,6 +3,7 @@ language: minimal
 addons:
   apt:
     packages:
+    - python3-pip
     - python3-pyparsing
 install:
 - pip --version
