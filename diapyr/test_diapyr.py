@@ -232,3 +232,22 @@ class TestDI(TestCase):
         c = childc(C)
         self.assertIs(b.a, c.a)
         self.assertIs(b.a, di(A))
+
+    def test_setupmethods(self):
+        class A:
+            @types(str)
+            def __init__(self, s): self.s = s
+        class B(A):
+            @types(int)
+            def __init(self, i): self.i = i
+        class C(B):
+            @types()
+            def __init(self): self.both = self.s, self.i
+        di = DI()
+        di.add('hello')
+        di.add(100)
+        di.add(C)
+        c = di(C)
+        self.assertEqual('hello', c.s)
+        self.assertEqual(100, c.i)
+        self.assertEqual(('hello', 100), c.both)
