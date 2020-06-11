@@ -223,4 +223,4 @@ class DI:
             source.discard()
 
     def createchild(self):
-        return self.__class__(self)
+        return self.__class__(self) # FIXME: Ensure self is thread-safe.
