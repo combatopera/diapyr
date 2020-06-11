@@ -16,7 +16,7 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 from .util import innerclass
-import unittest
+from unittest import TestCase
 
 class MyOuter:
 
@@ -46,7 +46,7 @@ class MyOuter:
     @innerclass
     class PlainInner(object): pass
 
-class TestCommon(unittest.TestCase):
+class TestCommon(TestCase):
 
     def test_fancyinner(self):
         inner = MyOuter('mybaz').FancyInner('myfoo')

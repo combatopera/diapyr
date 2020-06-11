@@ -17,9 +17,9 @@
 
 from . import DI, types
 from .start import starter, Started
-import unittest
+from unittest import TestCase
 
-class TestStarted(unittest.TestCase):
+class TestStarted(TestCase):
 
     def test_started(self):
         class A:

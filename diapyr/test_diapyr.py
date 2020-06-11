@@ -16,9 +16,9 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 from . import DI, types
-import unittest
+from unittest import TestCase
 
-class TestDI(unittest.TestCase):
+class TestDI(TestCase):
 
     def test_instances(self):
         class Basestring:
