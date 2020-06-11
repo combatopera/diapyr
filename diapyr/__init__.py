@@ -91,13 +91,15 @@ class Creator(Source):
         if self.instance is None:
             log.debug("%s: %s", self.action, self.typelabel)
             deptypes, defaults = self.getdeptypesanddefaults(self.callable)
-            if defaults:
-                args = [self.di(t) for t in deptypes[:-len(defaults)]]
-                args += [self.di(t, default = d) for t, d in zip(deptypes[-len(defaults):], defaults)]
-            else:
-                args = [self.di(t) for t in deptypes]
-            self.instance = self.callable(*args)
+            args = self.toargs(deptypes, defaults)
+            self.instance = self.enhance(self.callable(*args))
         return self.instance
+
+    def toargs(self, deptypes, defaults):
+        if defaults:
+            args = [self.di(t) for t in deptypes[:-len(defaults)]]
+            return args + [self.di(t, default = d) for t, d in zip(deptypes[-len(defaults):], defaults)]
+        return [self.di(t) for t in deptypes]
 
     def discard(self):
         if self.instance is not None:
@@ -122,6 +124,17 @@ class Class(Creator):
         except AttributeError:
             raise MissingAnnotationException("Missing types annotation: %s" % self.typelabel)
 
+    def enhance(self, instance):
+        for name in dir(instance):
+            f = getattr(instance, name)
+            try:
+                deptypes = f.di_deptypes
+            except AttributeError:
+                continue
+            defaults = inspect.getargspec(f).defaults
+            getattr(instance, name)(*self.toargs(deptypes, defaults))
+        return instance
+
 class Factory(Creator):
 
     action = 'Fabricating'
@@ -133,6 +146,9 @@ class Factory(Creator):
     @staticmethod
     def getdeptypesanddefaults(factory):
         return factory.di_deptypes, inspect.getargspec(factory).defaults
+
+    def enhance(self, instance):
+        return instance
 
 class UnsatisfiableRequestException(Exception): pass
 

@@ -239,7 +239,9 @@ class TestDI(TestCase):
             def __init__(self, s): self.s = s
         class B(A):
             @types(int)
-            def __init(self, i): self.i = i
+            def __init(self, i, j = 200):
+                self.i = i
+                self.j = j
         class C(B):
             @types()
             def __init(self): self.both = self.s, self.i
@@ -250,4 +252,5 @@ class TestDI(TestCase):
         c = di(C)
         self.assertEqual('hello', c.s)
         self.assertEqual(100, c.i)
+        self.assertEqual(200, c.j)
         self.assertEqual(('hello', 100), c.both)
