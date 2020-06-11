@@ -211,3 +211,24 @@ class TestDI(TestCase):
         self.assertEqual(['OK.start', 'BadStop.start'], events)
         di.stop()
         self.assertEqual(['OK.start', 'BadStop.start', "%s.%s" % (self.BadStop.__module__, self.BadStop.__name__), 'OK.stop'], events)
+
+    def test_child(self):
+        class A:
+            @types()
+            def __init__(self): pass
+        class B:
+            @types(A)
+            def __init__(self, a): self.a = a
+        class C:
+            @types(A)
+            def __init__(self, a): self.a = a
+        di = DI()
+        di.add(A)
+        childb = di.createchild()
+        childb.add(B)
+        childc = di.createchild()
+        childc.add(C)
+        b = childb(B)
+        c = childc(C)
+        self.assertIs(b.a, c.a)
+        self.assertIs(b.a, di(A))

@@ -140,9 +140,10 @@ class DI:
 
     error = log.error # Tests may override.
 
-    def __init__(self):
+    def __init__(self, parent = None):
         self.typetosources = {}
         self.allsources = [] # Old-style classes won't be registered against object.
+        self.parent = parent
 
     def addsource(self, source):
         for type in source.types:
@@ -194,8 +195,11 @@ class DI:
             componenttype, = clazz
             return self.all(componenttype) # XXX: Allow empty list?
         objs = self.all(clazz)
-        if not objs and 'default' in kwargs:
-            return kwargs['default']
+        if not objs:
+            if 'default' in kwargs:
+                return kwargs['default']
+            if self.parent is not None:
+                return self.parent(clazz, **kwargs)
         if 1 != len(objs):
             raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (clazz, len(objs)))
         return objs[0]
@@ -217,3 +221,6 @@ class DI:
     def discardall(self):
         for source in reversed(self.allsources):
             source.discard()
+
+    def createchild(self):
+        return self.__class__(self)
