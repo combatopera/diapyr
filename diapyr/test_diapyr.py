@@ -234,7 +234,7 @@ class TestDI(TestCase):
         self.assertIs(b.a, di(A))
 
     def test_setupmethods(self):
-        class A:
+        class A(object):
             @types(str)
             def __init__(self, s): self.s = s
         class X(A):

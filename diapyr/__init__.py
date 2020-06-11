@@ -125,14 +125,18 @@ class Class(Creator):
             raise MissingAnnotationException("Missing types annotation: %s" % self.typelabel)
 
     def enhance(self, instance):
-        for name in dir(instance):
-            f = getattr(instance, name)
-            try:
-                deptypes = f.di_deptypes
-            except AttributeError:
-                continue
-            defaults = inspect.getargspec(f).defaults
-            f(*self.toargs(deptypes, defaults))
+        methods = {}
+        for name in dir(self.callable):
+            if '__init__' != name:
+                m = getattr(instance, name)
+                if hasattr(m, 'di_deptypes'):
+                    methods[name] = m
+        if methods:
+            for ancestor in reversed(self.callable.mro()):
+                for name in dir(ancestor):
+                    if name in methods:
+                        m = methods.pop(name)
+                        m(*self.toargs(m.di_deptypes, inspect.getargspec(m).defaults))
         return instance
 
 class Factory(Creator):
