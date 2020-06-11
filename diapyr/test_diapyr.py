@@ -237,12 +237,12 @@ class TestDI(TestCase):
         class A:
             @types(str)
             def __init__(self, s): self.s = s
-        class B(A):
+        class X(A):
             @types(int)
             def __init(self, i, j = 200):
                 self.i = i
                 self.j = j
-        class C(B):
+        class C(X):
             @types()
             def __init(self): self.both = self.s, self.i
         di = DI()
