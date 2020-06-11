@@ -132,7 +132,7 @@ class Class(Creator):
             except AttributeError:
                 continue
             defaults = inspect.getargspec(f).defaults
-            getattr(instance, name)(*self.toargs(deptypes, defaults))
+            f(*self.toargs(deptypes, defaults))
         return instance
 
 class Factory(Creator):
