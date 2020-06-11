@@ -235,8 +235,9 @@ class TestDI(TestCase):
 
     def test_setupmethods(self):
         class A(object):
+            s = ''
             @types(str)
-            def __init__(self, s): self.s = s
+            def __init__(self, s): self.s += s
         class X(A):
             both = None
             @types(int)
