@@ -128,7 +128,7 @@ class Class(Creator):
         methods = {}
         for name in dir(self.callable):
             if '__init__' != name:
-                m = getattr(instance, name)
+                m = getattr(self.callable, name)
                 if hasattr(m, 'di_deptypes'):
                     methods[name] = m
         if methods:
@@ -136,7 +136,7 @@ class Class(Creator):
                 for name in dir(ancestor):
                     if name in methods:
                         m = methods.pop(name)
-                        m(*self.toargs(m.di_deptypes, inspect.getargspec(m).defaults))
+                        m(instance, *self.toargs(m.di_deptypes, inspect.getargspec(m).defaults))
         return instance
 
 class Factory(Creator):

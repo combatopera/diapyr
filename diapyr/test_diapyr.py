@@ -238,6 +238,8 @@ class TestDI(TestCase):
             s = ''
             @types(str)
             def __init__(self, s): self.s += s
+            @property
+            def uhoh(self): raise Exception
         class X(A):
             both = None
             @types(int)
