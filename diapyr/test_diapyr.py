@@ -242,9 +242,13 @@ class TestDI(TestCase):
             def __init(self, i, j = 200):
                 self.i = i
                 self.j = j
+            @types()
+            def zzz(self): raise Exception # Unreachable.
         class C(X):
             @types()
             def __init(self): self.both = self.s, self.i
+            @types()
+            def zzz(self): self.z = self.both # Will not work if called as part of X.
         di = DI()
         di.add('hello')
         di.add(100)
@@ -254,3 +258,4 @@ class TestDI(TestCase):
         self.assertEqual(100, c.i)
         self.assertEqual(200, c.j)
         self.assertEqual(('hello', 100), c.both)
+        self.assertEqual(('hello', 100), c.z)
