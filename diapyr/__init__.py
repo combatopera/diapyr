@@ -90,9 +90,9 @@ class Creator(Source):
     def __call__(self):
         if self.instance is None:
             log.debug("%s: %s", self.action, self.typelabel)
-            deptypes, defaults = self.getdeptypesanddefaults(self.callable)
-            args = self.toargs(deptypes, defaults)
-            self.instance = self.enhance(self.callable(*args))
+            instance = self.callable(*self.toargs(*self.getdeptypesanddefaults(self.callable)))
+            self.enhance(instance)
+            self.instance = instance
         return self.instance
 
     def toargs(self, deptypes, defaults):
@@ -137,7 +137,6 @@ class Class(Creator):
                     if name in methods:
                         m = methods.pop(name)
                         m(instance, *self.toargs(m.di_deptypes, inspect.getargspec(m).defaults))
-        return instance
 
 class Factory(Creator):
 
@@ -152,7 +151,7 @@ class Factory(Creator):
         return factory.di_deptypes, inspect.getargspec(factory).defaults
 
     def enhance(self, instance):
-        return instance
+        pass
 
 class UnsatisfiableRequestException(Exception): pass
 
