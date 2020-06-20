@@ -237,6 +237,12 @@ class DI:
         for source in reversed(self.allsources):
             source.tostopped()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc_info):
+        self.discardall()
+
     def discardall(self):
         for source in reversed(self.allsources):
             source.discard()

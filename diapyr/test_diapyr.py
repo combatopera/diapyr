@@ -266,3 +266,14 @@ class TestDI(TestCase):
         self.assertEqual(('hello', 100), c.both)
         self.assertEqual(None, c.z1)
         self.assertEqual(('hello', 100), c.z2)
+
+    def test_with(self):
+        disposed = []
+        class A:
+            @types()
+            def __init__(self): pass
+            def dispose(self): disposed.append(self)
+        with DI() as di:
+            di.add(A)
+            di(A)
+        self.assertEqual([A], [o.__class__ for o in disposed])
