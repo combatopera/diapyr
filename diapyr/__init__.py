@@ -82,13 +82,15 @@ class Instance(Source):
 
 class Creator(Source):
 
+    voidinstance = object()
+
     def __init__(self, callable, di):
         Source.__init__(self, self.getowntype(callable), di)
-        self.instance = None
+        self.instance = self.voidinstance
         self.callable = callable
 
     def __call__(self):
-        if self.instance is None:
+        if self.instance is self.voidinstance:
             log.debug("%s: %s", self.action, self.typelabel)
             instance = self.callable(*self.toargs(*self.getdeptypesanddefaults(self.callable)))
             self.enhance(instance)
@@ -102,9 +104,9 @@ class Creator(Source):
         return [self.di(t) for t in deptypes]
 
     def discard(self):
-        if self.instance is not None:
+        if self.instance is not self.voidinstance:
             if hasattr(self.instance, 'dispose'): self.instance.dispose()
-            self.instance = None
+            self.instance = self.voidinstance
 
 class MissingAnnotationException(Exception): pass
 
