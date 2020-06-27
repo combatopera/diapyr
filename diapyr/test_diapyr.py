@@ -277,3 +277,16 @@ class TestDI(TestCase):
             di.add(A)
             di(A)
         self.assertEqual([A], [o.__class__ for o in disposed])
+
+    def test_returnnone(self):
+        v = []
+        class Result: pass
+        @types(this = Result)
+        def r(): v.append(len(v))
+        di = DI()
+        di.add(r)
+        self.assertEqual([], v)
+        self.assertEqual(None, di(Result))
+        self.assertEqual([0], v)
+        self.assertEqual(None, di(Result))
+        self.assertEqual([0], v)
