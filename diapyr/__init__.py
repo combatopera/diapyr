@@ -159,16 +159,16 @@ class Builder(Creator):
 
     action = 'Building'
 
-    def __init__(self, selftype, method, di):
+    def __init__(self, receivertype, method, di):
         Creator.__init__(self, method, di)
-        self.selftype = selftype
+        self.receivertype = receivertype
 
     @staticmethod
     def getowntype(factory):
         return factory.di_owntype
 
     def getdeptypesanddefaults(self, factory):
-        return (self.selftype,) + factory.di_deptypes, inspect.getargspec(factory).defaults
+        return (self.receivertype,) + factory.di_deptypes, inspect.getargspec(factory).defaults
 
     def enhance(self, instance):
         pass
