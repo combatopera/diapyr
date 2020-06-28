@@ -205,6 +205,7 @@ class DI:
         for name in dir(clazz):
             m = getattr(clazz, name)
             if hasattr(m, 'di_deptypes') and hasattr(m, 'di_owntype'):
+                assert '__init__' != name
                 self.addsource(Builder(clazz, m, self))
 
     def addinstance(self, instance, type = None):
