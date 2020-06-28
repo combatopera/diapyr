@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import division
 from . import DI, types
 from unittest import TestCase
 
@@ -290,3 +291,22 @@ class TestDI(TestCase):
         self.assertEqual([0], v)
         self.assertEqual(None, di(Result))
         self.assertEqual([0], v)
+
+    def test_buildsystem(self):
+        class B: pass
+        class X: pass
+        class Y: pass
+        class A:
+            @types(B)
+            def __init__(self, b): self.v = b.v / 2
+            @types(this = X)
+            def makex(self): return self.v
+        class BImpl(B):
+            @types()
+            def __init__(self): self.v = 3
+            @types(X, this = Y)
+            def makey(self, x): return x, self.v
+        di = DI()
+        di.add(A)
+        di.add(BImpl)
+        self.assertEqual((1.5, 3), di(Y))

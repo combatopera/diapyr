@@ -155,6 +155,24 @@ class Factory(Creator):
     def enhance(self, instance):
         pass
 
+class Builder(Creator):
+
+    action = 'Building'
+
+    def __init__(self, selftype, method, di):
+        Creator.__init__(self, method, di)
+        self.selftype = selftype
+
+    @staticmethod
+    def getowntype(factory):
+        return factory.di_owntype
+
+    def getdeptypesanddefaults(self, factory):
+        return (self.selftype,) + factory.di_deptypes, inspect.getargspec(factory).defaults
+
+    def enhance(self, instance):
+        pass
+
 class UnsatisfiableRequestException(Exception): pass
 
 class DI:
@@ -184,6 +202,10 @@ class DI:
         if hasattr(clazz, 'start'):
             from .start import starter
             self.addclass(starter(clazz))
+        for name in dir(clazz):
+            m = getattr(clazz, name)
+            if hasattr(m, 'di_deptypes') and hasattr(m, 'di_owntype'):
+                self.addsource(Builder(clazz, m, self))
 
     def addinstance(self, instance, type = None):
         self.addsource(Instance(instance, instance.__class__ if type is None else type, self))
