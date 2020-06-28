@@ -131,7 +131,7 @@ class Class(Creator):
         for name in dir(self.callable):
             if '__init__' != name:
                 m = getattr(self.callable, name)
-                if hasattr(m, 'di_deptypes'):
+                if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
                     methods[name] = m
         if methods:
             for ancestor in reversed(self.callable.mro()):
