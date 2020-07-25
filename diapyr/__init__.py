@@ -92,7 +92,10 @@ class DI:
     def all(self, type):
         return [source() for source in self.typetosources.get(type, [])]
 
-    def __call__(self, clazz, **kwargs):
+    def __call__(self, clazz):
+        return self._one(clazz)
+
+    def _one(self, clazz, **kwargs):
         if list == type(clazz):
             componenttype, = clazz
             return self.all(componenttype) # XXX: Allow empty list?

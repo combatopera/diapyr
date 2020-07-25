@@ -90,9 +90,9 @@ class Creator(Source):
 
     def toargs(self, deptypes, defaults):
         if defaults:
-            args = [self.di(t) for t in deptypes[:-len(defaults)]]
-            return args + [self.di(t, default = d) for t, d in zip(deptypes[-len(defaults):], defaults)]
-        return [self.di(t) for t in deptypes]
+            args = [self.di._one(t) for t in deptypes[:-len(defaults)]]
+            return args + [self.di._one(t, default = d) for t, d in zip(deptypes[-len(defaults):], defaults)]
+        return [self.di._one(t) for t in deptypes]
 
     def discard(self):
         if self.instance is not self.voidinstance:
