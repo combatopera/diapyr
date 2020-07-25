@@ -90,6 +90,9 @@ class DI:
         return addmethods
 
     def all(self, type):
+        return self._all(type)
+
+    def _all(self, type):
         return [source() for source in self.typetosources.get(type, [])]
 
     def __call__(self, clazz):
@@ -98,8 +101,8 @@ class DI:
     def _one(self, clazz, default):
         if list == type(clazz):
             componenttype, = clazz
-            return self.all(componenttype) # XXX: Allow empty list?
-        objs = self.all(clazz)
+            return self._all(componenttype) # XXX: Allow empty list?
+        objs = self._all(clazz)
         if not objs:
             if default is not unset:
                 return default # XXX: Check ancestors first?
