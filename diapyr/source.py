@@ -91,7 +91,7 @@ class Creator(Source):
     def toargs(self, deptypes, defaults):
         if defaults:
             args = [self.di._one(t, unset) for t in deptypes[:-len(defaults)]]
-            return args + [self.di._one(t, d) for t, d in zip(deptypes[-len(defaults):], defaults)]
+            return args + [self.di._one(t, default) for t, default in zip(deptypes[-len(defaults):], defaults)]
         return [self.di._one(t, unset) for t in deptypes]
 
     def discard(self):
