@@ -245,9 +245,9 @@ class TestDI(TestCase):
             ("%s Request: %s", '>', 'diapyr.test_diapyr.C'),
             ("%s Request: %s", '>>', 'diapyr.test_diapyr.B'),
             ("%s Request: %s", '>>>', 'diapyr.test_diapyr.A'),
-            ("%s %s: %s", '>>>', 'Instantiating', 'diapyr.test_diapyr.A'),
-            ("%s %s: %s", '>>', 'Instantiating', 'diapyr.test_diapyr.B'),
-            ("%s %s: %s", '>', 'Instantiating', 'diapyr.test_diapyr.C'),
+            ("%s %s: %s", '>>>', 'Instantiate', 'diapyr.test_diapyr.A'),
+            ("%s %s: %s", '>>', 'Instantiate', 'diapyr.test_diapyr.B'),
+            ("%s %s: %s", '>', 'Instantiate', 'diapyr.test_diapyr.C'),
             ("%s Enhance: %s", '>', 'diapyr.test_diapyr.C'),
         ], self.debugs)
 
