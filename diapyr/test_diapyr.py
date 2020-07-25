@@ -21,6 +21,8 @@ from unittest import TestCase
 
 class TestDI(TestCase):
 
+    maxDiff = None
+
     def test_instances(self):
         class Basestring:
             def __init__(self, text): self.text = text
@@ -226,18 +228,27 @@ class TestDI(TestCase):
             @types()
             def __init__(self): pass
         class B:
+            @types([A])
+            def __init__(self, v): pass
+        class C(object):
+            @types(B)
+            def __init__(self, b): pass
             @types(A)
-            def __init__(self, a): pass
+            def __init(self, a): pass
         di = DI()
         di.log = self
         di.add(A)
         di.add(B)
-        di(B)
+        di.add(C)
+        di(C)
         self.assertEqual([
-            ("Request: %s", 'diapyr.test_diapyr.B'),
-            ("Request: %s", 'diapyr.test_diapyr.A'),
-            ("%s: %s", 'Instantiating', 'diapyr.test_diapyr.A'),
-            ("%s: %s", 'Instantiating', 'diapyr.test_diapyr.B'),
+            ("%s Request: %s", '>', 'diapyr.test_diapyr.C'),
+            ("%s Request: %s", '>>', 'diapyr.test_diapyr.B'),
+            ("%s Request: %s", '>>>', 'diapyr.test_diapyr.A'),
+            ("%s %s: %s", '>>>', 'Instantiating', 'diapyr.test_diapyr.A'),
+            ("%s %s: %s", '>>', 'Instantiating', 'diapyr.test_diapyr.B'),
+            ("%s %s: %s", '>', 'Instantiating', 'diapyr.test_diapyr.C'),
+            ("%s Enhance: %s", '>', 'diapyr.test_diapyr.C'),
         ], self.debugs)
 
     def test_child(self):

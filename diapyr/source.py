@@ -41,7 +41,7 @@ class Source:
 
     def tostarted(self):
         if self.lifecycle.startable:
-            instance = self() # Observe we only instantiate if startable.
+            instance = self(self.di.depthunit) # Observe we only instantiate if startable.
             self.di.log.debug("Starting: %s", self.typelabel)
             instance.start() # On failure we assume state unchanged from Stopped.
             self.lifecycle = self.Started
@@ -49,7 +49,7 @@ class Source:
 
     def tostopped(self):
         if self.lifecycle.stoppable:
-            instance = self() # Should already exist.
+            instance = self(self.di.depthunit) # Should already exist.
             self.di.log.debug("Stopping: %s", self.typelabel)
             try:
                 instance.stop()
@@ -63,7 +63,7 @@ class Instance(Source):
         Source.__init__(self, type, di)
         self.instance = instance
 
-    def __call__(self):
+    def __call__(self, depth):
         return self.instance
 
     def discard(self):
@@ -78,21 +78,21 @@ class Creator(Source):
         self.instance = self.voidinstance
         self.callable = callable
 
-    def __call__(self):
+    def __call__(self, depth):
         if self.instance is self.voidinstance:
-            self.di.log.debug("Request: %s", self.typelabel)
-            args = self.toargs(*self.getdeptypesanddefaults(self.callable))
-            self.di.log.debug("%s: %s", self.action, self.typelabel)
+            self.di.log.debug("%s Request: %s", depth, self.typelabel)
+            args = self.toargs(*self.getdeptypesanddefaults(self.callable), depth = "%s%s" % (depth, self.di.depthunit))
+            self.di.log.debug("%s %s: %s", depth, self.action, self.typelabel)
             instance = self.callable(*args)
-            self.enhance(instance)
+            self.enhance(instance, depth)
             self.instance = instance
         return self.instance
 
-    def toargs(self, deptypes, defaults):
+    def toargs(self, deptypes, defaults, depth):
         if defaults:
-            args = [self.di._one(t, unset) for t in deptypes[:-len(defaults)]]
-            return args + [self.di._one(t, default) for t, default in zip(deptypes[-len(defaults):], defaults)]
-        return [self.di._one(t, unset) for t in deptypes]
+            args = [self.di._one(t, unset, depth) for t in deptypes[:-len(defaults)]]
+            return args + [self.di._one(t, default, depth) for t, default in zip(deptypes[-len(defaults):], defaults)]
+        return [self.di._one(t, unset, depth) for t in deptypes]
 
     def discard(self):
         if self.instance is not self.voidinstance:
@@ -115,7 +115,7 @@ class Class(Creator):
         except AttributeError:
             raise MissingAnnotationException("Missing types annotation: %s" % self.typelabel)
 
-    def enhance(self, instance):
+    def enhance(self, instance, depth):
         methods = {}
         for name in dir(self.callable):
             if '__init__' != name:
@@ -123,11 +123,12 @@ class Class(Creator):
                 if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
                     methods[name] = m
         if methods:
+            self.di.log.debug("%s Enhance: %s", depth, self.typelabel)
             for ancestor in reversed(self.callable.mro()):
                 for name in dir(ancestor):
                     if name in methods:
                         m = methods.pop(name)
-                        m(instance, *self.toargs(m.di_deptypes, inspect.getargspec(m).defaults))
+                        m(instance, *self.toargs(m.di_deptypes, inspect.getargspec(m).defaults, depth))
 
 class Factory(Creator):
 
@@ -141,7 +142,7 @@ class Factory(Creator):
     def getdeptypesanddefaults(factory):
         return factory.di_deptypes, inspect.getargspec(factory).defaults
 
-    def enhance(self, instance):
+    def enhance(self, instance, depth):
         pass
 
 class Builder(Creator):
@@ -159,5 +160,5 @@ class Builder(Creator):
     def getdeptypesanddefaults(self, factory):
         return (self.receivertype,) + factory.di_deptypes, inspect.getargspec(factory).defaults
 
-    def enhance(self, instance):
+    def enhance(self, instance, depth):
         pass

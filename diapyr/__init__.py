@@ -36,6 +36,7 @@ class UnsatisfiableRequestException(Exception): pass
 class DI:
 
     log = log # Tests may override.
+    depthunit = '>'
 
     def __init__(self, parent = None):
         self.typetosources = {}
@@ -90,24 +91,24 @@ class DI:
         return addmethods
 
     def all(self, type):
-        return self._all(type)
+        return self._all(type, self.depthunit)
 
-    def _all(self, type):
-        return [source() for source in self.typetosources.get(type, [])]
+    def _all(self, type, depth):
+        return [source(depth) for source in self.typetosources.get(type, [])]
 
     def __call__(self, clazz):
-        return self._one(clazz, unset)
+        return self._one(clazz, unset, self.depthunit)
 
-    def _one(self, clazz, default):
+    def _one(self, clazz, default, depth):
         if list == type(clazz):
             componenttype, = clazz
-            return self._all(componenttype) # XXX: Allow empty list?
-        objs = self._all(clazz)
+            return self._all(componenttype, depth) # XXX: Allow empty list?
+        objs = self._all(clazz, depth)
         if not objs:
             if default is not unset:
                 return default # XXX: Check ancestors first?
             if self.parent is not None:
-                return self.parent._one(clazz, default)
+                return self.parent._one(clazz, default, depth)
         if 1 != len(objs):
             raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (clazz, len(objs)))
         return objs[0]
