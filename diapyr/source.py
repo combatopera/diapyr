@@ -16,7 +16,7 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 from .iface import ManualStart, MissingAnnotationException
-import logging, inspect
+import inspect, logging
 
 log = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ class Source:
             try:
                 instance.stop()
             except:
-                self.di.error("Failed to stop an instance of %s:", self.typelabel, exc_info = True)
+                self.di.log.error("Failed to stop an instance of %s:", self.typelabel, exc_info = True)
             self.lifecycle = self.Stopped # Even on failure, we don't attempt to stop again.
 
 class Instance(Source):

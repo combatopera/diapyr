@@ -35,7 +35,7 @@ class UnsatisfiableRequestException(Exception): pass
 
 class DI:
 
-    error = log.error # Tests may override.
+    log = log # Tests may override.
 
     def __init__(self, parent = None):
         self.typetosources = {}
