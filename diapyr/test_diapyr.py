@@ -196,10 +196,14 @@ class TestDI(TestCase):
 
         def stop(self): raise self.BadStopException
 
+    def debug(self, *args):
+        self.debugs.append(args)
+
     def error(self, *args, **kwargs):
         self.errors.append([args, kwargs])
 
     def test_stoperrorislogged(self):
+        self.debugs = [] # Never mind.
         self.errors = events = []
         di = DI()
         di.log = self
