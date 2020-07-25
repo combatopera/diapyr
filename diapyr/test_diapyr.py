@@ -220,6 +220,26 @@ class TestDI(TestCase):
             'OK.stop',
         ], events)
 
+    def test_logging(self):
+        self.debugs = []
+        class A:
+            @types()
+            def __init__(self): pass
+        class B:
+            @types(A)
+            def __init__(self, a): pass
+        di = DI()
+        di.log = self
+        di.add(A)
+        di.add(B)
+        di(B)
+        self.assertEqual([
+            ("Request: %s", 'diapyr.test_diapyr.B'),
+            ("Request: %s", 'diapyr.test_diapyr.A'),
+            ("%s: %s", 'Instantiating', 'diapyr.test_diapyr.A'),
+            ("%s: %s", 'Instantiating', 'diapyr.test_diapyr.B'),
+        ], self.debugs)
+
     def test_child(self):
         class A:
             @types()

@@ -80,8 +80,10 @@ class Creator(Source):
 
     def __call__(self):
         if self.instance is self.voidinstance:
+            self.di.log.debug("Request: %s", self.typelabel)
+            args = self.toargs(*self.getdeptypesanddefaults(self.callable))
             self.di.log.debug("%s: %s", self.action, self.typelabel)
-            instance = self.callable(*self.toargs(*self.getdeptypesanddefaults(self.callable)))
+            instance = self.callable(*args)
             self.enhance(instance)
             self.instance = instance
         return self.instance
