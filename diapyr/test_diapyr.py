@@ -196,14 +196,11 @@ class TestDI(TestCase):
 
         def stop(self): raise self.BadStopException
 
-    def error(self, msg, *args, **kwargs):
-        self.assertEqual({'exc_info': True}, kwargs)
-        self.assertEqual("Failed to stop an instance of %s:", msg)
-        arg, = args
-        self.logs.append(arg)
+    def error(self, *args, **kwargs):
+        self.errors.append([args, kwargs])
 
     def test_stoperrorislogged(self):
-        self.logs = events = []
+        self.errors = events = []
         di = DI()
         di.log = self
         di.add(events)
@@ -212,7 +209,12 @@ class TestDI(TestCase):
         di.start()
         self.assertEqual(['OK.start', 'BadStop.start'], events)
         di.stop()
-        self.assertEqual(['OK.start', 'BadStop.start', "%s.%s" % (self.BadStop.__module__, self.BadStop.__name__), 'OK.stop'], events)
+        self.assertEqual([
+            'OK.start',
+            'BadStop.start',
+            [('Failed to stop an instance of %s:', "%s.%s" % (self.BadStop.__module__, self.BadStop.__name__)), {'exc_info': True}],
+            'OK.stop',
+        ], events)
 
     def test_child(self):
         class A:
