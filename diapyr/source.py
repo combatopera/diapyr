@@ -101,7 +101,7 @@ class Creator(Source):
 
 class Class(Creator):
 
-    action = 'Instantiating'
+    action = 'Instantiate'
 
     @staticmethod
     def getowntype(clazz):
@@ -132,7 +132,7 @@ class Class(Creator):
 
 class Factory(Creator):
 
-    action = 'Fabricating'
+    action = 'Fabricate'
 
     @staticmethod
     def getowntype(factory):
@@ -147,7 +147,7 @@ class Factory(Creator):
 
 class Builder(Creator):
 
-    action = 'Building'
+    action = 'Build'
 
     def __init__(self, receivertype, method, di):
         Creator.__init__(self, method, di)
