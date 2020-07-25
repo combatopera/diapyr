@@ -18,3 +18,5 @@
 class ManualStart: pass
 
 class MissingAnnotationException(Exception): pass
+
+unset = object()

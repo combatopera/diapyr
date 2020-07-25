@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .iface import ManualStart, MissingAnnotationException
+from .iface import ManualStart, MissingAnnotationException, unset
 from .source import Builder, Class, Factory, Instance
 import logging
 
@@ -93,18 +93,18 @@ class DI:
         return [source() for source in self.typetosources.get(type, [])]
 
     def __call__(self, clazz):
-        return self._one(clazz)
+        return self._one(clazz, unset)
 
-    def _one(self, clazz, **kwargs):
+    def _one(self, clazz, default):
         if list == type(clazz):
             componenttype, = clazz
             return self.all(componenttype) # XXX: Allow empty list?
         objs = self.all(clazz)
         if not objs:
-            if 'default' in kwargs:
-                return kwargs['default']
+            if default is not unset:
+                return default # XXX: Check ancestors first?
             if self.parent is not None:
-                return self.parent(clazz, **kwargs)
+                return self.parent._one(clazz, default)
         if 1 != len(objs):
             raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (clazz, len(objs)))
         return objs[0]

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .iface import ManualStart, MissingAnnotationException
+from .iface import ManualStart, MissingAnnotationException, unset
 import inspect
 
 class Source:
@@ -90,9 +90,9 @@ class Creator(Source):
 
     def toargs(self, deptypes, defaults):
         if defaults:
-            args = [self.di._one(t) for t in deptypes[:-len(defaults)]]
-            return args + [self.di._one(t, default = d) for t, d in zip(deptypes[-len(defaults):], defaults)]
-        return [self.di._one(t) for t in deptypes]
+            args = [self.di._one(t, unset) for t in deptypes[:-len(defaults)]]
+            return args + [self.di._one(t, d) for t, d in zip(deptypes[-len(defaults):], defaults)]
+        return [self.di._one(t, unset) for t in deptypes]
 
     def discard(self):
         if self.instance is not self.voidinstance:
