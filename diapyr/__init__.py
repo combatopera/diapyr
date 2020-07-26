@@ -91,7 +91,7 @@ class DI:
         return addmethods
 
     def all(self, type):
-        return AllInstancesOf(type).di_get(self, unset, self.depthunit)
+        return AllInstancesOf(type).getall(self, self.depthunit)
 
     def __call__(self, clazz):
         return wrap(clazz).di_get(self, unset, self.depthunit)

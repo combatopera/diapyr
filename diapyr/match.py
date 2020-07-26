@@ -17,37 +17,21 @@
 
 from .iface import UnsatisfiableRequestException, unset
 
-class OneInstanceOf:
-
-    def __init__(self, clazz):
-        self.clazz = clazz
-
-    def di_get(self, di, default, depth):
-        objs = [source(depth) for source in di.typetosources.get(self.clazz, [])]
-        if not objs:
-            if default is not unset:
-                return default # XXX: Check ancestors first?
-            if di.parent is not None:
-                return self.di_get(di.parent, default, depth)
-        if 1 != len(objs):
-            raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (self.clazz, len(objs))) # FIXME: Untested!
-        return objs[0]
-
 class AllInstancesOf:
 
     def __init__(self, clazz):
         self.clazz = clazz
 
-    def di_get(self, di, default, depth):
+    def getall(self, di, depth):
         return [source(depth) for source in di.typetosources.get(self.clazz, [])]
 
-class ExactMatch:
+    def di_get(self, di, default, depth):
+        return self.getall(di, depth)
 
-    def __init__(self, clazz):
-        self.clazz = clazz
+class One:
 
     def di_get(self, di, default, depth):
-        objs = [source(depth) for source in di.typetosources.get(self.clazz, []) if self.clazz == source.type]
+        objs = self.many(di, depth)
         if not objs:
             if default is not unset:
                 return default # XXX: Check ancestors first?
@@ -56,6 +40,22 @@ class ExactMatch:
         if 1 != len(objs):
             raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (self.clazz, len(objs))) # FIXME: Untested!
         return objs[0]
+
+class OneInstanceOf(One):
+
+    def __init__(self, clazz):
+        self.all = AllInstancesOf(clazz)
+
+    def many(self, di, depth):
+        return self.all.getall(di, depth)
+
+class ExactMatch(One):
+
+    def __init__(self, clazz):
+        self.clazz = clazz
+
+    def many(self, di, depth):
+        return [source(depth) for source in di.typetosources.get(self.clazz, []) if self.clazz == source.type]
 
 def wrap(obj):
     if list == type(obj):
