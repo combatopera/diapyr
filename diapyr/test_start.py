@@ -46,3 +46,19 @@ class TestStarted(TestCase):
         di.add(A)
         di.add(B)
         self.assertEqual([A, B], [s.startable.__class__ for s in di.all(Started)])
+
+    def test_donotinstantiatesubclasses(self):
+        class A:
+            @types()
+            def __init__(self):
+                pass
+            def start(self):
+                pass
+        class B(A):
+            @types()
+            def __init__(self):
+                raise Exception('No.')
+        di = DI()
+        di.add(A)
+        di.add(B)
+        di.all(Started)
