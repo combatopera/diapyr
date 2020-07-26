@@ -16,6 +16,7 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 from .iface import ManualStart, MissingAnnotationException, unset
+from .match import wrap
 import inspect
 
 class Source:
@@ -91,9 +92,9 @@ class Creator(Source):
 
     def toargs(self, deptypes, defaults, depth):
         if defaults:
-            args = [self.di._one(t, unset, depth) for t in deptypes[:-len(defaults)]]
-            return args + [self.di._one(t, default, depth) for t, default in zip(deptypes[-len(defaults):], defaults)]
-        return [self.di._one(t, unset, depth) for t in deptypes]
+            args = [t.di_get(self.di, unset, depth) for t in deptypes[:-len(defaults)]]
+            return args + [t.di_get(self.di, default, depth) for t, default in zip(deptypes[-len(defaults):], defaults)]
+        return [t.di_get(self.di, unset, depth) for t in deptypes]
 
     def discard(self):
         if self.instance is not self.voidinstance:
@@ -152,14 +153,14 @@ class Builder(Creator):
 
     def __init__(self, receivertype, method, di):
         Creator.__init__(self, method, di)
-        self.receivertype = receivertype
+        self.receivermatch = wrap(receivertype)
 
     @staticmethod
     def getowntype(factory):
         return factory.di_owntype
 
     def getdeptypesanddefaults(self, factory):
-        return (self.receivertype,) + factory.di_deptypes, inspect.getargspec(factory).defaults
+        return (self.receivermatch,) + factory.di_deptypes, inspect.getargspec(factory).defaults
 
     def enhance(self, instance, depth):
         pass

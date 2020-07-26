@@ -16,16 +16,12 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 from . import types
+from .match import ExactMatch
 import logging
 
 log = logging.getLogger(__name__)
 
 class Started: pass
-
-class ExactMatch(object):
-
-    def __init__(self, clazz):
-        self.clazz = clazz
 
 def starter(startabletype):
     try:

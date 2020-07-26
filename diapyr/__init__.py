@@ -15,23 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .iface import ManualStart, MissingAnnotationException, unset
+from .iface import ManualStart, MissingAnnotationException, UnsatisfiableRequestException, unset
+from .match import AllInstancesOf, wrap
 from .source import Builder, Class, Factory, Instance
 import logging
 
 log = logging.getLogger(__name__)
 assert ManualStart
 assert MissingAnnotationException
+assert UnsatisfiableRequestException
 
 def types(*deptypes, **kwargs):
     def g(f):
-        f.di_deptypes = deptypes
+        f.di_deptypes = tuple(wrap(t) for t in deptypes)
         if 'this' in kwargs:
             f.di_owntype = kwargs['this']
         return f
     return g
-
-class UnsatisfiableRequestException(Exception): pass
 
 class DI:
 
@@ -91,31 +91,10 @@ class DI:
         return addmethods
 
     def all(self, type):
-        return self._all(type, self.depthunit)
-
-    def _all(self, type, depth):
-        return [source(depth) for source in self.typetosources.get(type, [])]
+        return AllInstancesOf(type).di_get(self, unset, self.depthunit)
 
     def __call__(self, clazz):
-        return self._one(clazz, unset, self.depthunit)
-
-    def _one(self, clazz, default, depth):
-        if list == type(clazz):
-            componenttype, = clazz
-            return self._all(componenttype, depth) # XXX: Allow empty list?
-        from .start import ExactMatch
-        if ExactMatch == type(clazz):
-            objs = [source(depth) for source in self.typetosources.get(clazz.clazz, []) if clazz.clazz == source.type]
-        else:
-            objs = self._all(clazz, depth)
-        if not objs:
-            if default is not unset:
-                return default # XXX: Check ancestors first?
-            if self.parent is not None:
-                return self.parent._one(clazz, default, depth)
-        if 1 != len(objs):
-            raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (clazz, len(objs))) # FIXME: Untested!
-        return objs[0]
+        return wrap(clazz).di_get(self, unset, self.depthunit)
 
     def start(self):
         started = []

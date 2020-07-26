@@ -19,4 +19,6 @@ class ManualStart: pass
 
 class MissingAnnotationException(Exception): pass
 
+class UnsatisfiableRequestException(Exception): pass
+
 unset = object()
