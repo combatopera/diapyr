@@ -36,7 +36,7 @@ def starter(startabletype):
             startable.start()
             self.startable = startable
         def dispose(self):
-            log.debug("Stopping: %s", typelabel)
+            log.debug("Stopping: %s", typelabel) # FIXME: Untested.
             self.startable.stop()
     startabletype.di_starter = StartedImpl
     return StartedImpl

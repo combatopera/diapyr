@@ -67,7 +67,7 @@ class Instance(Source):
         return self.instance
 
     def discard(self):
-        pass
+        pass # TODO: Test this if possible.
 
 class Creator(Source):
 
@@ -113,7 +113,7 @@ class Class(Creator):
         try:
             return ctor.di_deptypes, defaults
         except AttributeError:
-            raise MissingAnnotationException("Missing types annotation: %s" % self.typelabel)
+            raise MissingAnnotationException("Missing types annotation: %s" % self.typelabel) # TODO: Test this.
 
     def enhance(self, instance, depth):
         methods = {}

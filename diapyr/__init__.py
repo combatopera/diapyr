@@ -51,7 +51,7 @@ class DI:
                 self.typetosources[type] = [source]
         self.allsources.append(source)
 
-    def removesource(self, source):
+    def removesource(self, source): # TODO: Untested.
         for type in source.types:
             self.typetosources[type].remove(source)
         self.allsources.remove(source)
@@ -110,7 +110,7 @@ class DI:
             if self.parent is not None:
                 return self.parent._one(clazz, default, depth)
         if 1 != len(objs):
-            raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (clazz, len(objs)))
+            raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (clazz, len(objs))) # FIXME: Untested!
         return objs[0]
 
     def start(self):
