@@ -58,6 +58,7 @@ class TestStarted(TestCase):
             @types()
             def __init__(self):
                 raise Exception('No.')
+            start = None
         di = DI()
         di.add(A)
         di.add(B)

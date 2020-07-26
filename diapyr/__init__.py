@@ -58,7 +58,7 @@ class DI:
 
     def addclass(self, clazz):
         self.addsource(Class(clazz, self))
-        if hasattr(clazz, 'start'):
+        if getattr(clazz, 'start', None) is not None:
             from .start import starter
             self.addclass(starter(clazz))
         for name in dir(clazz):
@@ -103,7 +103,11 @@ class DI:
         if list == type(clazz):
             componenttype, = clazz
             return self._all(componenttype, depth) # XXX: Allow empty list?
-        objs = self._all(clazz, depth)
+        from .start import ExactMatch
+        if ExactMatch == type(clazz):
+            objs = [source(depth) for source in self.typetosources.get(clazz.clazz, []) if clazz.clazz == source.type]
+        else:
+            objs = self._all(clazz, depth)
         if not objs:
             if default is not unset:
                 return default # XXX: Check ancestors first?

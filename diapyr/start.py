@@ -22,6 +22,11 @@ log = logging.getLogger(__name__)
 
 class Started: pass
 
+class ExactMatch(object):
+
+    def __init__(self, clazz):
+        self.clazz = clazz
+
 def starter(startabletype):
     try:
         return startabletype.__dict__['di_starter']
@@ -29,9 +34,8 @@ def starter(startabletype):
         pass
     typelabel = "%s.%s" % (startabletype.__module__, startabletype.__name__)
     class StartedImpl(Started):
-        @types([startabletype]) # TODO LATER: Shouldn't instantiate subtypes.
-        def __init__(self, startables):
-            startable, = (s for s in startables if s.__class__ == startabletype)
+        @types(ExactMatch(startabletype))
+        def __init__(self, startable):
             log.debug("Starting: %s", typelabel)
             startable.start()
             self.startable = startable

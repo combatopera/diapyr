@@ -37,6 +37,7 @@ class Source:
         self.typelabel = "%s.%s" % (type.__module__, type.__name__)
         # We assume stop exists if start does:
         self.lifecycle = self.Stopped if hasattr(type, 'start') and not issubclass(type, ManualStart) else self.Static
+        self.type = type
         self.di = di
 
     def tostarted(self):
