@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .util import innerclass
+from .util import innerclass, singleton
 from unittest import TestCase
 
 class MyOuter:
@@ -77,3 +77,8 @@ class TestCommon(TestCase):
         inner.myprop = 'hmm3'
         self.assertEqual('hmm2', outer.myprop) # XXX: Possible to propagate value?
         self.assertEqual('hmm3', inner.myprop)
+
+    def test_singleton(self):
+        @singleton
+        def t(): return 100
+        self.assertEqual(100, t)
