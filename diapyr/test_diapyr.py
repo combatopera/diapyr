@@ -16,7 +16,7 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import division
-from . import DI, types
+from .diapyr import DI, types
 from unittest import TestCase
 
 class TestDI(TestCase):

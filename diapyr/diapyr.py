@@ -15,15 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .iface import ManualStart, MissingAnnotationException, UnsatisfiableRequestException, unset
+from .iface import unset
 from .match import AllInstancesOf, wrap
 from .source import Builder, Class, Factory, Instance
+from .start import starter
 import logging
 
 log = logging.getLogger(__name__)
-assert ManualStart
-assert MissingAnnotationException
-assert UnsatisfiableRequestException
 
 def types(*deptypes, **kwargs):
     def g(f):
@@ -59,7 +57,6 @@ class DI:
     def addclass(self, clazz):
         self.addsource(Class(clazz, self))
         if getattr(clazz, 'start', None) is not None:
-            from .start import starter
             self.addclass(starter(clazz))
         for name in dir(clazz):
             m = getattr(clazz, name)

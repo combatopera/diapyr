@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import types
 from .match import ExactMatch
 import logging
 
@@ -30,6 +29,7 @@ def starter(startabletype):
         pass
     typelabel = "%s.%s" % (startabletype.__module__, startabletype.__name__)
     class StartedImpl(Started):
+        from .diapyr import types
         @types(ExactMatch(startabletype))
         def __init__(self, startable):
             log.debug("Starting: %s", typelabel)

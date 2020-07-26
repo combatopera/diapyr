@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import DI, types
+from .diapyr import DI, types
 from .start import starter, Started
 from unittest import TestCase
 
