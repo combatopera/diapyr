@@ -24,9 +24,13 @@ class Started: pass
 
 def starter(startabletype):
     try:
-        return startabletype.__dict__['di_starter']
-    except KeyError:
+        starter = startabletype.di_starter
+    except AttributeError:
         pass
+    else:
+        match, = starter.__init__.di_deptypes
+        if match.clazz == startabletype: # Otherwise it's inherited.
+            return starter
     typelabel = "%s.%s" % (startabletype.__module__, startabletype.__name__)
     class StartedImpl(Started):
         from .diapyr import types
