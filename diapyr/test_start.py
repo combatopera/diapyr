@@ -59,7 +59,12 @@ class TestStarted(TestCase):
             def __init__(self):
                 raise Exception('No.')
             start = None
+        class C(A):
+            @types()
+            def __init__(self):
+                pass
         di = DI()
         di.add(A)
         di.add(B)
-        di.all(Started)
+        di.add(C)
+        self.assertEqual([A, C], [obj.startable.__class__ for obj in di.all(Started)])
