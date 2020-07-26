@@ -43,6 +43,10 @@ class One:
 
 class OneInstanceOf(One):
 
+    @property
+    def clazz(self):
+        return self.all.clazz
+
     def __init__(self, clazz):
         self.all = AllInstancesOf(clazz)
 
