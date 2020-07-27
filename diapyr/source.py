@@ -73,9 +73,10 @@ class Instance(Source):
 
 class Creator(Source):
 
+    instance = unset
+
     def __init__(self, callable, di):
         Source.__init__(self, self.getowntype(callable), di)
-        self.instance = unset
         self.callable = callable
 
     def __call__(self, depth):
