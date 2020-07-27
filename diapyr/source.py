@@ -73,15 +73,13 @@ class Instance(Source):
 
 class Creator(Source):
 
-    voidinstance = object()
-
     def __init__(self, callable, di):
         Source.__init__(self, self.getowntype(callable), di)
-        self.instance = self.voidinstance
+        self.instance = unset
         self.callable = callable
 
     def __call__(self, depth):
-        if self.instance is self.voidinstance:
+        if self.instance is unset:
             self.di.log.debug("%s Request: %s", depth, self.typelabel)
             args = self.toargs(*self.getdeptypesanddefaults(self.callable), depth = "%s%s" % (depth, self.di.depthunit))
             self.di.log.debug("%s %s: %s", depth, self.action, self.typelabel)
@@ -97,9 +95,9 @@ class Creator(Source):
         return [t.di_get(self.di, unset, depth) for t in deptypes]
 
     def discard(self):
-        if self.instance is not self.voidinstance:
+        if self.instance is not unset:
             if hasattr(self.instance, 'dispose'): self.instance.dispose()
-            self.instance = self.voidinstance
+            self.instance = unset
 
 class Class(Creator):
 
