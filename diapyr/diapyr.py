@@ -57,7 +57,7 @@ class DI:
         for name in dir(clazz):
             m = getattr(clazz, name)
             if hasattr(m, 'di_deptypes') and hasattr(m, 'di_owntype'):
-                assert '__init__' != name
+                assert '__init__' != name # TODO LATER: Check upfront.
                 self.addsource(Builder(clazz, m, self))
         if getattr(clazz, 'start', None) is not None:
             self.addclass(starter(clazz))
