@@ -54,13 +54,13 @@ class DI:
 
     def addclass(self, clazz):
         self.addsource(Class(clazz, self))
-        if getattr(clazz, 'start', None) is not None:
-            self.addclass(starter(clazz))
         for name in dir(clazz):
             m = getattr(clazz, name)
             if hasattr(m, 'di_deptypes') and hasattr(m, 'di_owntype'):
                 assert '__init__' != name
                 self.addsource(Builder(clazz, m, self))
+        if getattr(clazz, 'start', None) is not None:
+            self.addclass(starter(clazz))
 
     def addinstance(self, instance, type = None):
         self.addsource(Instance(instance, instance.__class__ if type is None else type, self))
