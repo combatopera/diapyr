@@ -19,6 +19,7 @@ from .iface import unset
 from .match import AllInstancesOf, wrap
 from .source import Builder, Class, Factory, Instance
 from .start import starter
+from collections import defaultdict
 import logging
 
 log = logging.getLogger(__name__)
@@ -37,16 +38,13 @@ class DI:
     depthunit = '>'
 
     def __init__(self, parent = None):
-        self.typetosources = {}
+        self.typetosources = defaultdict(list)
         self.allsources = [] # Old-style classes won't be registered against object.
         self.parent = parent
 
     def addsource(self, source):
         for type in source.types:
-            try:
-                self.typetosources[type].append(source)
-            except KeyError:
-                self.typetosources[type] = [source]
+            self.typetosources[type].append(source)
         self.allsources.append(source)
 
     def removesource(self, source): # TODO: Untested.
