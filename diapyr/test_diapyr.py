@@ -17,7 +17,7 @@
 
 from __future__ import division
 from .diapyr import DI, types
-from .iface import UnsatisfiableRequestException
+from .iface import MissingAnnotationException, UnsatisfiableRequestException
 from unittest import TestCase
 
 def add(di, obj):
@@ -378,3 +378,16 @@ class TestDI(TestCase):
             realdiscard = src.discard
             src.discard = intercept
         self.assertEqual(['yay'], discards)
+
+    def test_addbadclass(self):
+        class A:
+            def __init__(self): pass
+        di = DI()
+        with self.assertRaises(MissingAnnotationException):
+            di.add(A)
+
+    def test_addbadclass2(self):
+        class A: pass
+        di = DI()
+        with self.assertRaises(MissingAnnotationException):
+            di.add(A)
