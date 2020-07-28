@@ -85,6 +85,8 @@ class TestDI(TestCase):
         self.assertEqual([di.addinstance, di.addclass], add(di, Impl))
         self.assertEqual([di.addclass], add(di, Hmm))
         self.assertEqual('implval', di(Hmm).val)
+        del Impl.__init__
+        self.assertEqual([di.addinstance], list(di._addmethods(Impl)))
 
     def test_factory(self):
         class I: pass
