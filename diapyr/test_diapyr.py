@@ -278,7 +278,7 @@ class TestDI(TestCase):
             @types(str)
             def __init__(self, s): self.s += s
             @property
-            def uhoh(self): raise Exception
+            def uhoh(self): raise Exception # pragma: no cover
         class X(A):
             both = None
             @types(int)
@@ -286,7 +286,7 @@ class TestDI(TestCase):
                 self.i = i
                 self.j = j
             @types()
-            def zzz1(self): raise Exception
+            def zzz1(self): raise Exception # pragma: no cover
         class C(X):
             @types()
             def __init(self): self.both = self.s, self.i
