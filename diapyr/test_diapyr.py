@@ -17,6 +17,7 @@
 
 from __future__ import division
 from .diapyr import DI, types
+from .iface import UnsatisfiableRequestException
 from unittest import TestCase
 
 class TestDI(TestCase):
@@ -342,3 +343,16 @@ class TestDI(TestCase):
         di.add(A)
         di.add(BImpl)
         self.assertEqual((1.5, 3), di(Y))
+
+    def test_toomany(self):
+        class A:
+            @types()
+            def __init__(self): pass
+        class B(A): pass
+        class C(A): pass
+        di = DI()
+        di.add(B)
+        di.add(C)
+        with self.assertRaises(UnsatisfiableRequestException):
+            di(A)
+        self.assertEqual([B, C], [x.__class__ for x in di.all(A)])
