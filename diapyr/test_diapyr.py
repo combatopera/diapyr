@@ -356,3 +356,15 @@ class TestDI(TestCase):
         with self.assertRaises(UnsatisfiableRequestException):
             di(A)
         self.assertEqual([B, C], [x.__class__ for x in di.all(A)])
+
+    def test_discardinstance(self):
+        discards = []
+        def intercept():
+            realdiscard() # Does nothing.
+            discards.append('yay')
+        with DI() as di:
+            di.add(100)
+            src, = di.allsources
+            realdiscard = src.discard
+            src.discard = intercept
+        self.assertEqual(['yay'], discards)
