@@ -75,7 +75,7 @@ class TestDI(TestCase):
             class Impl:
                 __metaclass__ = HasVal
                 @types()
-                def __init__(self): pass
+                def __init__(self): raise Exception # pragma: no cover
         Impl.val = 'implval'
         class Hmm:
             @types(HasVal)
