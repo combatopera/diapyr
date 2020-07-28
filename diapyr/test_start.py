@@ -57,7 +57,7 @@ class TestStarted(TestCase):
         class B(A):
             @types()
             def __init__(self):
-                raise Exception('No.')
+                raise Exception('No.') # pragma: no cover
             start = None
         class C(A):
             @types()
