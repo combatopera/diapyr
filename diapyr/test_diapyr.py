@@ -158,11 +158,8 @@ class TestDI(TestCase):
         di = DI()
         di.add(Kaboom)
         di.start() # Should do nothing.
-        try:
+        with self.assertRaises(KaboomException):
             di(Kaboom)
-            self.fail('Expected a KaboomException.')
-        except KaboomException:
-            pass # Expected.
 
     class BadStart(Eventful):
 
@@ -183,11 +180,8 @@ class TestDI(TestCase):
         di.add(B)
         di.add(C)
         di.add(self.BadStart)
-        try:
+        with self.assertRaises(self.BadStart.BadStartException):
             di.start()
-            self.fail('Expected a BadStartException.')
-        except self.BadStart.BadStartException:
-            pass # Expected.
         self.assertEqual(['A.start', 'B.start', 'C.start', 'C.stop', 'B.stop'], events)
         di.stop()
         self.assertEqual(['A.start', 'B.start', 'C.start', 'C.stop', 'B.stop', 'A.stop'], events)
