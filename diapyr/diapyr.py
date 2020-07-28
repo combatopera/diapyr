@@ -72,27 +72,28 @@ class DI:
     def addfactory(self, factory):
         self.addsource(Factory(factory, self))
 
-    def add(self, obj):
+    def _addmethods(self, obj):
         if hasattr(obj, 'di_owntype'):
-            addmethods = self.addfactory,
+            yield self.addfactory
         elif hasattr(obj, '__class__'):
             clazz = obj.__class__
             if clazz == type: # It's a non-fancy class.
-                addmethods = self.addclass,
+                yield self.addclass
             elif isinstance(obj, type): # It's a fancy class.
-                addmethods = [self.addinstance]
+                yield self.addinstance
                 try:
                     obj.__init__.di_deptypes
-                    addmethods.append(self.addclass)
+                    yield self.addclass
                 except AttributeError:
                     pass # Not admissible as class.
             else: # It's an instance.
-                addmethods = self.addinstance,
+                yield self.addinstance
         else: # It's an old-style class.
-            addmethods = self.addclass,
-        for m in addmethods:
+            yield self.addclass
+
+    def add(self, obj):
+        for m in self._addmethods(obj):
             m(obj)
-        return addmethods # FIXME: Not API.
 
     def all(self, type):
         return AllInstancesOf(type).getall(self, self.depthunit)

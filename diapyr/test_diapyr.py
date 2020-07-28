@@ -20,6 +20,11 @@ from .diapyr import DI, types
 from .iface import UnsatisfiableRequestException
 from unittest import TestCase
 
+def add(di, obj):
+    methods = list(di._addmethods(obj))
+    di.add(obj)
+    return methods
+
 class TestDI(TestCase):
 
     maxDiff = None
@@ -35,31 +40,30 @@ class TestDI(TestCase):
         self.assertEqual([], di.all(Unicode))
         self.assertEqual([], di.all(Basestring))
         self.assertEqual([], di.all(list))
-        self.assertEqual((di.addinstance,), di.add(Str('hmm')))
+        self.assertEqual([di.addinstance], add(di, Str('hmm')))
         self.assertEqual([Str('hmm')], di.all(Str))
         self.assertEqual([], di.all(Unicode))
         self.assertEqual([Str('hmm')], di.all(Basestring))
         self.assertEqual([], di.all(list))
-        self.assertEqual((di.addinstance,), di.add(Unicode('hmmm')))
+        self.assertEqual([di.addinstance], add(di, Unicode('hmmm')))
         self.assertEqual([Str('hmm')], di.all(Str))
         self.assertEqual([Unicode('hmmm')], di.all(Unicode))
         self.assertEqual([Str('hmm'), Unicode('hmmm')], di.all(Basestring))
         self.assertEqual([], di.all(list))
 
     def test_simpleinjection(self):
-        di = DI()
         class Hmm:
             @types(str)
             def __init__(self, dep):
                 self.dep = dep
-        self.assertEqual((di.addclass,), di.add(Hmm))
-        self.assertEqual((di.addinstance,), di.add('hmm'))
+        di = DI()
+        self.assertEqual([di.addclass], add(di, Hmm))
+        self.assertEqual([di.addinstance], add(di, 'hmm'))
         hmm = di(Hmm)
         self.assertEqual('hmm', hmm.dep)
         self.assertIs(hmm, di(Hmm))
 
     def test_metaclass(self):
-        di = DI()
         class HasVal(type): pass
         try:
             localz = locals()
@@ -77,20 +81,20 @@ class TestDI(TestCase):
             @types(HasVal)
             def __init__(self, hasval):
                 self.val = hasval.val
-        self.assertEqual([di.addinstance, di.addclass], di.add(Impl))
-        self.assertEqual((di.addclass,), di.add(Hmm))
-        hmm = di(Hmm)
-        self.assertEqual('implval', hmm.val)
+        di = DI()
+        self.assertEqual([di.addinstance, di.addclass], add(di, Impl))
+        self.assertEqual([di.addclass], add(di, Hmm))
+        self.assertEqual('implval', di(Hmm).val)
 
     def test_factory(self):
-        di = DI()
         class I: pass
         class N(int): pass
         class P(int): pass
         @types(int, this = I)
         def factory(n):
             return N(n) if n < 0 else P(n)
-        self.assertEqual((di.addfactory,), di.add(factory))
+        di = DI()
+        self.assertEqual([di.addfactory], add(di, factory))
         di.add(5)
         i = di(I) # No spin as DI thinks factory is I only.
         self.assertIs(P, i.__class__)
