@@ -69,7 +69,7 @@ class TestDI(TestCase):
             localz = locals()
             exec('''class Impl(metaclass = HasVal):
     @types()
-    def __init__(self): pass''', globals(), localz)
+    def __init__(self): raise Exception''', globals(), localz)
             Impl = localz['Impl']
         except SyntaxError:
             class Impl:
