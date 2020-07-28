@@ -71,7 +71,7 @@ class TestDI(TestCase):
     @types()
     def __init__(self): pass''', globals(), localz)
             Impl = localz['Impl']
-        except:
+        except SyntaxError:
             class Impl:
                 __metaclass__ = HasVal
                 @types()
