@@ -73,7 +73,7 @@ class TestDI(TestCase):
             @types(HasVal)
             def __init__(self, hasval):
                 self.val = hasval.val
-        self.assertEqual((di.addclass, di.addinstance), di.add(Impl))
+        self.assertEqual([di.addinstance], di.add(Impl))
         self.assertEqual((di.addclass,), di.add(Hmm))
         hmm = di(Hmm)
         self.assertEqual('implval', hmm.val)

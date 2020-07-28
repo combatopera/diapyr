@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .iface import ManualStart, MissingAnnotationException, unset
+from .iface import ManualStart, unset
 from .match import wrap
 import inspect
 
@@ -109,12 +109,8 @@ class Class(Creator):
         return clazz
 
     def getdeptypesanddefaults(self, clazz):
-        ctor = getattr(clazz, '__init__')
-        defaults = inspect.getargspec(ctor).defaults
-        try:
-            return ctor.di_deptypes, defaults
-        except AttributeError:
-            raise MissingAnnotationException("Missing types annotation: %s" % self.typelabel) # TODO: Test this.
+        ctor = clazz.__init__
+        return ctor.di_deptypes, inspect.getargspec(ctor).defaults
 
     def enhance(self, instance, depth):
         methods = {}

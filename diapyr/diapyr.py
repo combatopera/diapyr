@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .iface import unset
+from .iface import MissingAnnotationException, unset
 from .match import AllInstancesOf, wrap
 from .source import Builder, Class, Factory, Instance
 from .start import starter
@@ -53,6 +53,10 @@ class DI:
         self.allsources.remove(source)
 
     def addclass(self, clazz):
+        try:
+            clazz.__init__.di_deptypes
+        except AttributeError:
+            raise MissingAnnotationException("Missing types annotation: %s" % clazz)
         self.addsource(Class(clazz, self))
         for name in dir(clazz):
             m = getattr(clazz, name)
@@ -76,14 +80,19 @@ class DI:
             if clazz == type: # It's a non-fancy class.
                 addmethods = self.addclass,
             elif isinstance(obj, type): # It's a fancy class.
-                addmethods = self.addclass, self.addinstance
+                addmethods = [self.addinstance]
+                try:
+                    obj.__init__.di_deptypes
+                    addmethods.append(self.addclass)
+                except AttributeError:
+                    pass # Not admissible as class.
             else: # It's an instance.
                 addmethods = self.addinstance,
         else: # It's an old-style class.
             addmethods = self.addclass,
         for m in addmethods:
             m(obj)
-        return addmethods
+        return addmethods # FIXME: Not API.
 
     def all(self, type):
         return AllInstancesOf(type).getall(self, self.depthunit)
