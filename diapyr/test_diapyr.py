@@ -63,17 +63,21 @@ class TestDI(TestCase):
         class HasVal(type): pass
         try:
             localz = locals()
-            exec('class Impl(metaclass = HasVal): pass', globals(), localz)
+            exec('''class Impl(metaclass = HasVal):
+    @types()
+    def __init__(self): pass''', globals(), localz)
             Impl = localz['Impl']
         except:
             class Impl:
                 __metaclass__ = HasVal
+                @types()
+                def __init__(self): pass
         Impl.val = 'implval'
         class Hmm:
             @types(HasVal)
             def __init__(self, hasval):
                 self.val = hasval.val
-        self.assertEqual([di.addinstance], di.add(Impl))
+        self.assertEqual([di.addinstance, di.addclass], di.add(Impl))
         self.assertEqual((di.addclass,), di.add(Hmm))
         hmm = di(Hmm)
         self.assertEqual('implval', hmm.val)
