@@ -97,7 +97,9 @@ class Creator(Source):
 
     def discard(self):
         if self.instance is not unset:
-            if hasattr(self.instance, 'dispose'): self.instance.dispose()
+            if hasattr(self.instance, 'dispose'):
+                self.di.log.debug("Dispose: %s", self.typelabel)
+                self.instance.dispose()
             self.instance = unset
 
 class Class(Creator):
