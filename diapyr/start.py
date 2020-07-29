@@ -16,9 +16,6 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 from .match import ExactMatch
-import logging
-
-log = logging.getLogger(__name__)
 
 class Started: pass
 
@@ -31,16 +28,13 @@ def starter(startabletype):
         match, = starter.__init__.di_deptypes
         if match.clazz == startabletype: # Otherwise it's inherited.
             return starter
-    typelabel = "%s.%s" % (startabletype.__module__, startabletype.__name__)
     class StartedImpl(Started):
         from .diapyr import types
         @types(ExactMatch(startabletype))
         def __init__(self, startable):
-            log.debug("Starting: %s", typelabel)
             startable.start()
             self.startable = startable
         def dispose(self):
-            log.debug("Stopping: %s", typelabel) # FIXME: Untested.
-            self.startable.stop()
+            self.startable.stop() # FIXME: Untested.
     startabletype.di_starter = StartedImpl
     return StartedImpl
