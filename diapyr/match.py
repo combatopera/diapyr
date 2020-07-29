@@ -23,7 +23,7 @@ class AllInstancesOf:
         self.clazz = clazz
 
     def getall(self, di, depth):
-        return [source(depth) for source in di.typetosources.get(self.clazz, [])]
+        return [source.make(depth) for source in di.typetosources.get(self.clazz, [])]
 
     def di_get(self, di, default, depth):
         return self.getall(di, depth)
@@ -59,7 +59,7 @@ class ExactMatch(One):
         self.clazz = clazz
 
     def many(self, di, depth):
-        return [source(depth) for source in di.typetosources.get(self.clazz, []) if self.clazz == source.type]
+        return [source.make(depth) for source in di.typetosources.get(self.clazz, []) if self.clazz == source.type]
 
 def wrap(obj):
     if list == type(obj):

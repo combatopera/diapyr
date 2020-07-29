@@ -43,7 +43,7 @@ class Source:
 
     def tostarted(self):
         if self.lifecycle.startable:
-            instance = self(self.di.depthunit) # Observe we only instantiate if startable.
+            instance = self.make(self.di.depthunit) # Observe we only instantiate if startable.
             self.di.log.debug("Starting: %s", self.typelabel)
             instance.start() # On failure we assume state unchanged from Stopped.
             self.lifecycle = self.Started
@@ -51,7 +51,7 @@ class Source:
 
     def tostopped(self):
         if self.lifecycle.stoppable:
-            instance = self(self.di.depthunit) # Should already exist.
+            instance = self.make(self.di.depthunit) # Should already exist.
             self.di.log.debug("Stopping: %s", self.typelabel)
             try:
                 instance.stop()
@@ -65,7 +65,7 @@ class Instance(Source):
         Source.__init__(self, type, di)
         self.instance = instance
 
-    def __call__(self, depth):
+    def make(self, depth):
         return self.instance
 
     def discard(self):
@@ -79,7 +79,7 @@ class Creator(Source):
         Source.__init__(self, self.getowntype(callable), di)
         self.callable = callable
 
-    def __call__(self, depth):
+    def make(self, depth):
         if self.instance is unset:
             self.di.log.debug("%s Request: %s", depth, self.typelabel)
             args = self.toargs(*self.getdeptypesanddefaults(self.callable), depth = "%s%s" % (depth, self.di.depthunit))
