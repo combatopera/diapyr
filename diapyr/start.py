@@ -15,9 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
+from .iface import Special
 from .match import ExactMatch
 
-class Started(object): pass
+class Started(Special): pass
 
 def starter(startabletype):
     try:

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .iface import ManualStart, unset
+from .iface import ManualStart, Special, unset
 from .match import wrap
 import inspect
 
@@ -35,7 +35,7 @@ class Source:
                 if base not in self.types:
                     addtype(base)
         addtype(type)
-        self.typelabel = "%s.%s" % (type.__module__, type.__name__)
+        self.typelabel = Special.gettypelabel(type)
         # We assume stop exists if start does:
         self.lifecycle = self.Stopped if hasattr(type, 'start') and not issubclass(type, ManualStart) else self.Static
         self.type = type
