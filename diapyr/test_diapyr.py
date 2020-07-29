@@ -232,7 +232,8 @@ class TestDI(TestCase):
         class A:
             @types()
             def __init__(self): pass
-        class B:
+        class B: pass
+        class BImpl(B):
             @types([A])
             def __init__(self, v): pass
         class C(object):
@@ -243,15 +244,15 @@ class TestDI(TestCase):
         di = DI()
         di.log = self
         di.add(A)
-        di.add(B)
+        di.add(BImpl)
         di.add(C)
         di(C)
         self.assertEqual([
-            ("%s Request: %s", '>', 'diapyr.test_diapyr.C'),
-            ("%s Request: %s", '>>', 'diapyr.test_diapyr.B'),
-            ("%s Request: %s", '>>>', 'diapyr.test_diapyr.A'),
+            ("%s Request: %s%s", '>', 'diapyr.test_diapyr.C', ''),
+            ("%s Request: %s%s", '>>', 'diapyr.test_diapyr.BImpl', '(diapyr.test_diapyr.B)'),
+            ("%s Request: %s%s", '>>>', 'diapyr.test_diapyr.A', ''),
             ("%s %s: %s", '>>>', 'Instantiate', 'diapyr.test_diapyr.A'),
-            ("%s %s: %s", '>>', 'Instantiate', 'diapyr.test_diapyr.B'),
+            ("%s %s: %s", '>>', 'Instantiate', 'diapyr.test_diapyr.BImpl'),
             ("%s %s: %s", '>', 'Instantiate', 'diapyr.test_diapyr.C'),
             ("%s Enhance: %s", '>', 'diapyr.test_diapyr.C'),
         ], self.debugs)
