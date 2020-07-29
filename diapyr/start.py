@@ -36,5 +36,5 @@ def starter(startabletype):
         self.startable = startable
     def dispose(self):
         self.startable.stop() # FIXME: Untested.
-    startabletype.di_starter = startedtype = type("Started[%s]" % startabletype, (Started,), {f.__name__: f for f in [__init__, dispose]})
+    startabletype.di_starter = startedtype = type("Started[%s]" % Special.gettypelabel(startabletype), (Started,), {f.__name__: f for f in [__init__, dispose]})
     return startedtype
