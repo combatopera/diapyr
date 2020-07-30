@@ -15,17 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .iface import ManualStart, Special, unset
+from .iface import Special, unset
 from .match import wrap
 import inspect
 
 class Source:
-
-    class Static: startable, stoppable = False, False
-
-    class Stopped: startable, stoppable = True, False
-
-    class Started: startable, stoppable = False, True
 
     def __init__(self, type, di):
         self.types = set()
@@ -36,28 +30,8 @@ class Source:
                     addtype(base)
         addtype(type)
         self.typelabel = Special.gettypelabel(type)
-        # We assume stop exists if start does:
-        self.lifecycle = self.Stopped if hasattr(type, 'start') and not issubclass(type, ManualStart) else self.Static
         self.type = type
         self.di = di
-
-    def tostarted(self):
-        if self.lifecycle.startable:
-            instance = self.make(self.di.depthunit, self.type) # Observe we only instantiate if startable.
-            self.di.log.debug("Starting: %s", self.typelabel)
-            instance.start() # On failure we assume state unchanged from Stopped.
-            self.lifecycle = self.Started
-            return True # Notify caller a transition to Started actually happened.
-
-    def tostopped(self):
-        if self.lifecycle.stoppable:
-            instance = self.make(self.di.depthunit, self.type) # Should already exist.
-            self.di.log.debug("Stopping: %s", self.typelabel)
-            try:
-                instance.stop()
-            except:
-                self.di.log.error("Failed to stop an instance of %s:", self.typelabel, exc_info = True)
-            self.lifecycle = self.Stopped # Even on failure, we don't attempt to stop again.
 
 class Instance(Source):
 
@@ -99,7 +73,10 @@ class Creator(Source):
         if self.instance is not unset:
             if hasattr(self.instance, 'dispose'):
                 self.di.log.debug("Dispose: %s", self.typelabel)
-                self.instance.dispose()
+                try:
+                    self.instance.dispose()
+                except:
+                    self.di.log.error("Failed to dispose an instance of %s:", self.typelabel, exc_info = True)
             self.instance = unset
 
 class Class(Creator):

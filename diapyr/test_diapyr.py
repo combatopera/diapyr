@@ -199,7 +199,7 @@ class TestDI(TestCase):
 
     class BadStop(OK):
 
-        class BadStopException: pass
+        class BadStopException(Exception): pass
 
         def stop(self): raise self.BadStopException
 
@@ -223,7 +223,7 @@ class TestDI(TestCase):
         self.assertEqual([
             'OK.start',
             'BadStop.start',
-            [('Failed to stop an instance of %s:', "%s.%s" % (self.BadStop.__module__, self.BadStop.__name__)), {'exc_info': True}],
+            [('Failed to dispose an instance of %s:', "Started[%s.%s]" % (self.BadStop.__module__, self.BadStop.__name__)), {'exc_info': True}],
             'OK.stop',
         ], events)
 

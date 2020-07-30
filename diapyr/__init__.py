@@ -16,10 +16,9 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 from .diapyr import DI, types
-from .iface import ManualStart, MissingAnnotationException, UnsatisfiableRequestException
+from .iface import MissingAnnotationException, UnsatisfiableRequestException
 
 assert DI
-assert ManualStart
 assert MissingAnnotationException
 assert types
 assert UnsatisfiableRequestException
