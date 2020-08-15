@@ -38,3 +38,28 @@ def innerclass(cls):
 
 def singleton(t):
     return t()
+
+@singleton
+class outerzip:
+
+    class Session:
+
+        def __init__(self, iterables):
+            self.iterators = [iter(i) for i in iterables]
+
+        def row(self):
+            self.validrow = len(self.iterators)
+            for i in self.iterators:
+                try:
+                    yield next(i)
+                except StopIteration:
+                    self.validrow -= 1
+                    yield
+
+    def __call__(self, *iterables):
+        session = self.Session(iterables)
+        while True:
+            values = tuple(session.row())
+            if not session.validrow:
+                break
+            yield values

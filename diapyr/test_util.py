@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .util import innerclass, singleton
+from .util import innerclass, outerzip, singleton
 from unittest import TestCase
 
 class MyOuter:
@@ -82,3 +82,9 @@ class TestCommon(TestCase):
         @singleton
         def t(): return 100
         self.assertEqual(100, t)
+
+    def test_outerzip(self):
+        self.assertEqual([], list(outerzip()))
+        self.assertEqual([], list(outerzip([])))
+        self.assertEqual([], list(outerzip([], [])))
+        self.assertEqual([(None, 0, 3), (None, 1, None), (None, 2, None)], list(outerzip([], [0, 1, 2], [3])))
