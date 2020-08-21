@@ -66,7 +66,10 @@ class outerzip:
 
 def enum(*lists):
     def d(cls):
+        cls.enum = v = []
         for args in lists:
-            setattr(cls, args[0], cls(*args))
+            obj = cls(*args)
+            setattr(cls, args[0], obj)
+            v.append(obj)
         return cls
     return d
