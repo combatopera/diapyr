@@ -63,3 +63,10 @@ class outerzip:
             if not session.validrow:
                 break
             yield values
+
+def enum(*lists):
+    def d(cls):
+        for args in lists:
+            setattr(cls, args[0], cls(*args))
+        return cls
+    return d
