@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .util import innerclass, outerzip, singleton
+from .util import enum, innerclass, outerzip, singleton
 from unittest import TestCase
 
 class MyOuter:
@@ -88,3 +88,28 @@ class TestCommon(TestCase):
         self.assertEqual([], list(outerzip([])))
         self.assertEqual([], list(outerzip([], [])))
         self.assertEqual([(None, 0, 3), (None, 1, None), (None, 2, None)], list(outerzip([], [0, 1, 2], [3])))
+
+    def test_enum(self):
+        @enum(['p', 5], ['q'])
+        class X:
+            def __init__(self, key, val = None):
+                self.key = key
+                self.val = val
+        self.assertEqual('p', X.p.key)
+        self.assertEqual(5, X.p.val)
+        self.assertEqual('q', X.q.key)
+        self.assertEqual(None, X.q.val)
+        self.assertEqual([X.p, X.q], X.enum)
+
+    def test_enum2(self):
+        @enum(['anum', 1], ['enum', 2], ['znum', 3])
+        class X:
+            def __init__(self, name, num):
+                self.name = name
+                self.num = num
+        self.assertEqual('anum', X.anum.name)
+        self.assertEqual(1, X.anum.num)
+        self.assertEqual('enum', X.enum.name) # Overrides the list.
+        self.assertEqual(2, X.enum.num)
+        self.assertEqual('znum', X.znum.name)
+        self.assertEqual(3, X.znum.num)
