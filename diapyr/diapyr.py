@@ -23,6 +23,7 @@ from collections import defaultdict
 import logging
 
 log = logging.getLogger(__name__)
+typeitself = type
 
 def types(*deptypes, **kwargs):
     def g(f):
@@ -58,16 +59,22 @@ class DI:
         except AttributeError:
             raise MissingAnnotationException("Missing types annotation: %s" % clazz)
         self.addsource(Class(clazz, self))
+        self._addbuilders(clazz)
+        if getattr(clazz, 'start', None) is not None:
+            self.addclass(starter(clazz))
+
+    def _addbuilders(self, clazz):
         for name in dir(clazz):
             m = getattr(clazz, name)
             if hasattr(m, 'di_deptypes') and hasattr(m, 'di_owntype'):
                 assert '__init__' != name # TODO LATER: Check upfront.
                 self.addsource(Builder(clazz, m, self))
-        if getattr(clazz, 'start', None) is not None:
-            self.addclass(starter(clazz))
 
     def addinstance(self, instance, type = None):
-        self.addsource(Instance(instance, instance.__class__ if type is None else type, self))
+        clazz = instance.__class__ if type is None else type
+        self.addsource(Instance(instance, clazz, self))
+        if not isinstance(instance, typeitself):
+            self._addbuilders(clazz)
 
     def addfactory(self, factory):
         self.addsource(Factory(factory, self))

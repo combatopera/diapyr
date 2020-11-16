@@ -392,3 +392,12 @@ class TestDI(TestCase):
         di = DI()
         with self.assertRaises(MissingAnnotationException):
             di.add(A)
+
+    def test_objasbuilder(self):
+        class B: pass # XXX: If a result type has builders, should they be added?
+        class A:
+            @types(this = B)
+            def mkb(self): return 100
+        di = DI()
+        di.add(A())
+        self.assertEqual(100, di(B))
