@@ -15,8 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .util import enum, innerclass, outerzip, singleton
+from .util import enum, innerclass, invokeall, outerzip, singleton
+from functools import partial
 from unittest import TestCase
+import sys
+
+ispy2 = sys.version_info.major < 3
 
 class MyOuter:
 
@@ -113,3 +117,47 @@ class TestCommon(TestCase):
         self.assertEqual(2, X.enum.num)
         self.assertEqual('znum', X.znum.name)
         self.assertEqual(3, X.znum.num)
+
+def good(value):
+    return value
+
+def bad(e):
+    raise e
+
+class TestInvokeAll(TestCase):
+
+    def test_generator(self):
+        with self.assertRaises(TypeError):
+            invokeall(_ for _ in [])
+
+    def test_happypath(self):
+        self.assertEqual([], invokeall([]))
+        self.assertEqual([50], invokeall([partial(good, 50)]))
+        self.assertEqual([100, 200], invokeall((partial(good, 100), partial(good, 200))))
+
+    def test_1fail(self):
+        e1 = Exception(1)
+        with self.assertRaises(Exception) as cm:
+            invokeall([partial(good, 123), partial(bad, e1)])
+        self.assertIs(e1, cm.exception)
+
+    def test_2fails(self):
+        e1 = Exception(1)
+        e2 = Exception(2)
+        with self.assertRaises(Exception) as cm:
+            invokeall([partial(bad, e1), partial(good, 456), partial(bad, e2)])
+        self.assertIs(e2, cm.exception)
+        if not ispy2:
+            self.assertIs(e1, cm.exception.__context__)
+
+    def test_3fails(self):
+        e1 = Exception(1)
+        e2 = Exception(2)
+        e3 = Exception(3)
+        with self.assertRaises(Exception) as cm:
+            invokeall([partial(bad, e1), partial(bad, e2), partial(bad, e3)])
+        # When cm.exception is printed these will appear in the order they were raised:
+        self.assertIs(e3, cm.exception)
+        if not ispy2:
+            self.assertIs(e2, cm.exception.__context__)
+            self.assertIs(e1, cm.exception.__context__.__context__)
