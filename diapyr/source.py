@@ -17,7 +17,10 @@
 
 from .iface import Special, unset
 from .match import wrap
-import inspect
+try:
+    from inspect import getfullargspec as getargspec
+except ImportError:
+    from inspect import getargspec
 
 class Source:
 
@@ -89,7 +92,7 @@ class Class(Creator):
 
     def getdeptypesanddefaults(self, clazz):
         ctor = clazz.__init__
-        return ctor.di_deptypes, inspect.getargspec(ctor).defaults
+        return ctor.di_deptypes, getargspec(ctor).defaults
 
     def enhance(self, instance, depth):
         methods = {}
@@ -104,7 +107,7 @@ class Class(Creator):
                 for name in dir(ancestor):
                     if name in methods:
                         m = methods.pop(name)
-                        m(instance, *self.toargs(m.di_deptypes, inspect.getargspec(m).defaults, depth))
+                        m(instance, *self.toargs(m.di_deptypes, getargspec(m).defaults, depth))
 
 class Factory(Creator):
 
@@ -116,7 +119,7 @@ class Factory(Creator):
 
     @staticmethod
     def getdeptypesanddefaults(factory):
-        return factory.di_deptypes, inspect.getargspec(factory).defaults
+        return factory.di_deptypes, getargspec(factory).defaults
 
     def enhance(self, instance, depth):
         pass
@@ -134,7 +137,7 @@ class Builder(Creator):
         return factory.di_owntype
 
     def getdeptypesanddefaults(self, factory):
-        return (self.receivermatch,) + factory.di_deptypes, inspect.getargspec(factory).defaults
+        return (self.receivermatch,) + factory.di_deptypes, getargspec(factory).defaults
 
     def enhance(self, instance, depth):
         pass

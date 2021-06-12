@@ -18,6 +18,7 @@
 from __future__ import division
 from .diapyr import DI, types
 from .iface import MissingAnnotationException, UnsatisfiableRequestException
+from .test_util import ispy2
 from unittest import TestCase
 
 def add(di, obj):
@@ -401,3 +402,14 @@ class TestDI(TestCase):
         di = DI()
         di.add(A())
         self.assertEqual(100, di(B))
+
+    def test_keywordonlyarg(self):
+        if not ispy2:
+            exec('''log = object()
+@types(str, this = int)
+def f(*args, log = log):
+    return [*args, log]
+di = DI()
+di.add('woo')
+di.add(f)
+self.assertEqual(['woo', log], di(int))''')
