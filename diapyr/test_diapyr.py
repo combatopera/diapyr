@@ -20,6 +20,7 @@ from .diapyr import DI, types
 from .iface import MissingAnnotationException, UnsatisfiableRequestException
 from .test_util import ispy2
 from unittest import TestCase
+import sys
 
 def add(di, obj):
     methods = list(di._addmethods(obj))
@@ -413,3 +414,16 @@ di = DI()
 di.add('woo')
 di.add(f)
 self.assertEqual(['woo', log], di(int))''')
+
+    def test_getexceptionindispose(self):
+        class C:
+            @types()
+            def __init__(self): pass
+            def dispose(self): self.x = sys.exc_info()[1]
+        class X(Exception): pass
+        x = X()
+        with self.assertRaises(X), DI() as di:
+            di.add(C)
+            c = di(C)
+            raise x
+        self.assertIs(x, c.x)
