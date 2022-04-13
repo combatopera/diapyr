@@ -427,3 +427,20 @@ self.assertEqual(['woo', log], di(int))''')
             c = di(C)
             raise x
         self.assertIs(x, c.x)
+
+    def test_getexceptionindisposeviaexitstack(self):
+        if ispy2:
+            return
+        from contextlib import ExitStack
+        class C:
+            @types()
+            def __init__(self): pass
+            def dispose(self): self.x = sys.exc_info()[1]
+        class X(Exception): pass
+        x = X()
+        with self.assertRaises(X), ExitStack() as stack:
+            di = stack.enter_context(DI())
+            di.add(C)
+            c = di(C)
+            raise x
+        self.assertIs(x, c.x)
