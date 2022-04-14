@@ -36,7 +36,7 @@ class One:
             if default is not unset:
                 return default # XXX: Check ancestors first?
             if di.parent is not None:
-                return self.di_get(di.parent, default, depth)
+                return self.di_get(di.parent, default, depth) # XXX: Is parent thread-safe?
         if 1 != len(objs):
             raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (self.clazz, len(objs))) # FIXME: Untested!
         return objs[0]

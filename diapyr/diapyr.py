@@ -131,6 +131,3 @@ class DI:
     def discardall(self):
         for source in reversed(self.allsources):
             source.discard()
-
-    def createchild(self):
-        return self.__class__(self) # FIXME: Ensure self is thread-safe.

@@ -271,9 +271,9 @@ class TestDI(TestCase):
             def __init__(self, a): self.a = a
         di = DI()
         di.add(A)
-        childb = di.createchild()
+        childb = DI(di)
         childb.add(B)
-        childc = di.createchild()
+        childc = DI(di)
         childc.add(C)
         b = childb(B)
         c = childc(C)
