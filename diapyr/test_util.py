@@ -15,12 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .util import enum, innerclass, invokeall, outerzip, singleton
+from .util import enum, innerclass, invokeall, ispy2, outerzip, singleton
 from functools import partial
 from unittest import TestCase
-import sys
-
-ispy2 = sys.version_info.major < 3
 
 class MyOuter:
 

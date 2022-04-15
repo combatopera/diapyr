@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+
+ispy2 = sys.version_info.major < 3
+
 class Proxy(object):
 
     def __getattr__(self, name):

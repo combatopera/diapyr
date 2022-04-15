@@ -18,7 +18,7 @@
 from __future__ import division
 from .diapyr import DI, types
 from .iface import MissingAnnotationException, UnsatisfiableRequestException
-from .test_util import ispy2
+from .util import ispy2
 from unittest import TestCase
 import sys
 
