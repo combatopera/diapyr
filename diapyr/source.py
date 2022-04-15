@@ -22,7 +22,7 @@ try:
 except ImportError:
     from inspect import getargspec
 
-class Source:
+class Source(object):
 
     def __init__(self, type):
         self.types = set()
@@ -38,7 +38,7 @@ class Source:
 class Instance(Source):
 
     def __init__(self, instance, type):
-        Source.__init__(self, type)
+        super(Instance, self).__init__(type)
         self.instance = instance
 
     def make(self, depth, trigger):
@@ -52,7 +52,7 @@ class Creator(Source):
     instance = unset
 
     def __init__(self, callable, di):
-        Source.__init__(self, self.getowntype(callable))
+        super(Creator, self).__init__(self.getowntype(callable))
         self.callable = callable
         self.di = di
 
@@ -133,7 +133,7 @@ class Builder(Creator):
     action = 'Build'
 
     def __init__(self, receivertype, method, di):
-        Creator.__init__(self, method, di)
+        super(Builder, self).__init__(method, di)
         self.receivermatch = wrap(receivertype)
 
     @staticmethod
