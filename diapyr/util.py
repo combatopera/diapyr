@@ -39,7 +39,7 @@ def innerclass(cls):
                 self = cls
             class Bound(Proxy, self):
                 _clsname = self.__name__
-                _enclosinginstance = enclosinginstance # XXX: What if callable?
+                _enclosinginstance = enclosinginstance
             return Bound
     g = dict(cls = cls, InnerMeta = InnerMeta)
     exec('class Inner(cls): __metaclass__ = InnerMeta' if ispy2 else 'class Inner(cls, metaclass = InnerMeta): pass', g)
