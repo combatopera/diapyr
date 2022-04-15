@@ -45,12 +45,20 @@ class MyOuter:
         return foo, bar, self.baz
 
     @innerclass
-    class PlainInner(object): pass
+    class PlainInner(object):
+
+        a = 100
+
+    class FancyInner2(FancyInner): pass
+
+    class PlainInner2(PlainInner):
+
+        a = 200
 
 class TestCommon(TestCase):
 
-    def test_fancyinner(self):
-        inner = MyOuter('mybaz').FancyInner('myfoo')
+    def _fancyinner(self, name):
+        inner = getattr(MyOuter('mybaz'), name)('myfoo')
         # Check _frobimpl is found:
         self.assertEqual(('myfoo', 'mybar1', 'mybaz'), inner.frob('mybar1'))
         self.assertEqual(('myfoo', 'mybar2', 'mybaz'), inner.frob('mybar2'))
@@ -60,12 +68,27 @@ class TestCommon(TestCase):
             inner.lol
         self.assertEqual(('lol',), cm.exception.args)
 
-    def test_plaininner(self):
-        inner = MyOuter('whatever').PlainInner()
+    def test_fancyinner(self):
+        self._fancyinner('FancyInner')
+
+    def test_fancyinner2(self):
+        self._fancyinner('FancyInner2')
+
+    def _plaininner(self, name):
+        inner = getattr(MyOuter('whatever'), name)()
         self.assertEqual('hidden', inner.foo)
         with self.assertRaises(AttributeError) as cm:
             inner.quux
-        self.assertEqual(("'PlainInner' object has no attribute 'quux'",), cm.exception.args)
+        self.assertEqual(("'%s' object has no attribute 'quux'" % name,), cm.exception.args)
+        return inner
+
+    def test_plaininner(self):
+        inner = self._plaininner('PlainInner')
+        self.assertEqual(100, inner.a)
+
+    def test_plaininner2(self):
+        inner = self._plaininner('PlainInner2')
+        self.assertEqual(200, inner.a)
 
     def test_propertyaccess(self):
         outer = MyOuter('hmm')
