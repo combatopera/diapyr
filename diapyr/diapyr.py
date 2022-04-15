@@ -72,7 +72,7 @@ class DI:
 
     def addinstance(self, instance, type = None):
         clazz = instance.__class__ if type is None else type
-        self.addsource(Instance(instance, clazz, self))
+        self.addsource(Instance(instance, clazz))
         if not isinstance(instance, typeitself):
             self._addbuilders(clazz)
 

@@ -24,7 +24,7 @@ except ImportError:
 
 class Source:
 
-    def __init__(self, type, di):
+    def __init__(self, type):
         self.types = set()
         def addtype(type):
             self.types.add(type)
@@ -34,12 +34,11 @@ class Source:
         addtype(type)
         self.typelabel = Special.gettypelabel(type)
         self.type = type
-        self.di = di
 
 class Instance(Source):
 
-    def __init__(self, instance, type, di):
-        Source.__init__(self, type, di)
+    def __init__(self, instance, type):
+        Source.__init__(self, type)
         self.instance = instance
 
     def make(self, depth, trigger):
@@ -53,8 +52,9 @@ class Creator(Source):
     instance = unset
 
     def __init__(self, callable, di):
-        Source.__init__(self, self.getowntype(callable), di)
+        Source.__init__(self, self.getowntype(callable))
         self.callable = callable
+        self.di = di
 
     def make(self, depth, trigger):
         if self.instance is unset:
