@@ -47,6 +47,18 @@ class Instance(Source):
     def discard(self):
         pass # TODO: Test this if possible.
 
+class Proxy(Source):
+
+    def __init__(self, otherdi, type):
+        super(Proxy, self).__init__(type)
+        self.otherdi = otherdi
+
+    def make(self, depth, trigger):
+        return self.otherdi(self.type)
+
+    def discard(self):
+        pass
+
 class Creator(Source):
 
     instance = unset

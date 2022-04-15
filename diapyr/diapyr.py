@@ -17,7 +17,7 @@
 
 from .iface import MissingAnnotationException, unset
 from .match import AllInstancesOf, wrap
-from .source import Builder, Class, Factory, Instance
+from .source import Builder, Class, Factory, Instance, Proxy
 from .start import starter
 from collections import defaultdict
 import logging
@@ -107,6 +107,9 @@ class DI:
 
     def __call__(self, clazz):
         return wrap(clazz).di_get(self, unset, self.depthunit)
+
+    def proxy(self, type):
+        return Proxy(self, type)
 
     def __enter__(self):
         return self
