@@ -18,6 +18,7 @@
 from __future__ import division
 from .diapyr import DI, types
 from .iface import MissingAnnotationException, UnsatisfiableRequestException
+from .start import Started
 from .util import ispy2
 from unittest import TestCase
 import sys
@@ -150,16 +151,16 @@ class TestDI(TestCase):
         di = DI()
         di.add(events)
         di.add(A)
-        di.start()
+        di.all(Started)
         self.assertEqual(['A.start'], events)
         di.add(B)
-        di.start() # Should only start new stuff.
+        di.all(Started) # Should only start new stuff.
         self.assertEqual(['A.start', 'B.start'], events)
-        di.start() # Nothing more to be done.
+        di.all(Started) # Nothing more to be done.
         self.assertEqual(['A.start', 'B.start'], events)
-        di.stop()
+        di.discardall()
         self.assertEqual(['A.start', 'B.start', 'B.stop', 'A.stop'], events)
-        di.stop() # Should be idempotent.
+        di.discardall() # Should be idempotent.
         self.assertEqual(['A.start', 'B.start', 'B.stop', 'A.stop'], events)
 
     def test_startdoesnotinstantiatenonstartables(self):
@@ -170,7 +171,7 @@ class TestDI(TestCase):
             def stop(self): pass # Not significant.
         di = DI()
         di.add(Kaboom)
-        di.start() # Should do nothing.
+        di.all(Started) # Should do nothing.
         with self.assertRaises(KaboomException):
             di(Kaboom)
 
@@ -180,7 +181,7 @@ class TestDI(TestCase):
 
         def start(self): raise self.BadStartException
 
-    def test_unrollduetobadstart(self):
+    def test_nounrollduetobadstart(self):
         class A(self.OK): pass
         class B(self.OK): pass
         class C(self.OK): pass
@@ -188,15 +189,15 @@ class TestDI(TestCase):
         di = DI()
         di.add(events)
         di.add(A)
-        di.start()
+        di.all(Started)
         self.assertEqual(['A.start'], events)
         di.add(B)
         di.add(C)
         di.add(self.BadStart)
         with self.assertRaises(self.BadStart.BadStartException):
-            di.start()
-        self.assertEqual(['A.start', 'B.start', 'C.start', 'C.stop', 'B.stop'], events)
-        di.stop()
+            di.all(Started)
+        self.assertEqual(['A.start', 'B.start', 'C.start'], events)
+        di.discardall()
         self.assertEqual(['A.start', 'B.start', 'C.start', 'C.stop', 'B.stop', 'A.stop'], events)
 
     class BadStop(OK):
@@ -219,9 +220,9 @@ class TestDI(TestCase):
         di.add(events)
         di.add(self.OK)
         di.add(self.BadStop)
-        di.start()
+        di.all(Started)
         self.assertEqual(['OK.start', 'BadStop.start'], events)
-        di.stop()
+        di.discardall()
         self.assertEqual([
             'OK.start',
             'BadStop.start',

@@ -18,7 +18,7 @@
 from .iface import MissingAnnotationException, unset
 from .match import AllInstancesOf, wrap
 from .source import Builder, Class, Factory, Instance
-from .start import Started, starter
+from .start import starter
 from collections import defaultdict
 import logging
 
@@ -107,20 +107,6 @@ class DI:
 
     def __call__(self, clazz):
         return wrap(clazz).di_get(self, unset, self.depthunit)
-
-    def start(self):
-        alreadystarted = set(s for s in self.typetosources.get(Started, []) if s.instance is not unset)
-        try:
-            self.all(Started)
-        except:
-            for source in reversed(self.typetosources.get(Started, [])):
-                if source not in alreadystarted:
-                    source.discard()
-            raise
-
-    def stop(self):
-        for source in reversed(self.typetosources.get(Started, [])):
-            source.discard()
 
     def __enter__(self):
         return self
