@@ -35,10 +35,8 @@ class Proxy(object):
 def innerclass(cls):
     class InnerMeta(type):
         def __get__(self, enclosinginstance, owner):
-            if self is Inner:
-                self = cls
             class Bound(Proxy, self):
-                _clsname = self.__name__
+                _clsname = (cls if self is Inner else self).__name__
                 _enclosinginstance = enclosinginstance
             return Bound
     g = dict(cls = cls, InnerMeta = InnerMeta)
