@@ -87,16 +87,15 @@ class Creator(Source):
         return [t.di_get(self.di, unset, depth) for t in deptypes]
 
     def discard(self):
-        if self.instance is not unset:
+        instance, self.instance = self.instance, unset
+        if instance is not unset:
             try:
-                dispose = self.instance.dispose
+                dispose = instance.dispose
             except AttributeError:
                 pass
             else:
                 self.di.log.debug("Dispose: %s", self.typelabel)
                 dispose()
-            finally:
-                self.instance = unset
 
 class Class(Creator):
 
