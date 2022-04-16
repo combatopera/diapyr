@@ -94,11 +94,9 @@ class Creator(Source):
                 pass
             else:
                 self.di.log.debug("Dispose: %s", self.typelabel)
-                try:
-                    dispose()
-                except:
-                    self.di.log.error("Failed to dispose an instance of %s:", self.typelabel, exc_info = True)
-            self.instance = unset
+                dispose()
+            finally:
+                self.instance = unset
 
 class Class(Creator):
 

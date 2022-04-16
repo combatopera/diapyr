@@ -212,7 +212,7 @@ class TestDI(TestCase):
     def error(self, *args, **kwargs):
         self.errors.append([args, kwargs])
 
-    def test_stoperrorislogged(self):
+    def test_stoperrorispropagated(self):
         self.debugs = [] # Never mind.
         self.errors = events = []
         di = DI()
@@ -222,11 +222,11 @@ class TestDI(TestCase):
         di.add(self.BadStop)
         di.all(Started)
         self.assertEqual(['OK.start', 'BadStop.start'], events)
-        di.discardall()
+        with self.assertRaises(self.BadStop.BadStopException):
+            di.discardall()
         self.assertEqual([
             'OK.start',
             'BadStop.start',
-            [('Failed to dispose an instance of %s:', "Started[%s.%s]" % (self.BadStop.__module__, self.BadStop.__name__)), {'exc_info': True}],
             'OK.stop',
         ], events)
 

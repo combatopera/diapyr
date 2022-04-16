@@ -19,6 +19,7 @@ from .iface import MissingAnnotationException, unset
 from .match import AllInstancesOf, wrap
 from .source import Builder, Class, Factory, Instance, Proxy
 from .start import starter
+from .util import invokeall
 from collections import defaultdict
 import logging
 
@@ -118,5 +119,4 @@ class DI:
         self.discardall()
 
     def discardall(self):
-        for source in reversed(self.allsources):
-            source.discard()
+        invokeall([s.discard for s in reversed(self.allsources)])
