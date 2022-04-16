@@ -108,8 +108,8 @@ class DI:
     def __call__(self, clazz):
         return wrap(clazz).di_get(self, unset, self.depthunit)
 
-    def proxy(self, type):
-        return Proxy(self, type)
+    def proxy(self, type, discardall = False):
+        return Proxy(self, type, discardall)
 
     def __enter__(self):
         return self

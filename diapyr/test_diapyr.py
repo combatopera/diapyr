@@ -468,3 +468,25 @@ self.assertEqual(['woo', log], di(int))''')
                 self.assertFalse(disposed)
             self.assertEqual([b], disposed)
         self.assertEqual([b, a], disposed)
+
+    def test_proxy2(self):
+        disposed = []
+        class D:
+            def dispose(self): disposed.append(self)
+        class A(D):
+            @types()
+            def __init__(self): pass
+        class B(D):
+            @types(A)
+            def __init__(self, a): self.a = a
+        with DI() as di:
+            di.add(A)
+            subdi = DI(di)
+            subdi.add(B)
+            di.addsource(subdi.proxy(B, True))
+            b = di(B)
+            a = di(A)
+            self.assertIs(b.a, a)
+            self.assertIs(b, subdi(B))
+            self.assertFalse(disposed)
+        self.assertEqual([b, a], disposed)

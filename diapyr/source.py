@@ -49,15 +49,17 @@ class Instance(Source):
 
 class Proxy(Source):
 
-    def __init__(self, otherdi, type):
+    def __init__(self, otherdi, type, discardall):
         super(Proxy, self).__init__(type)
         self.otherdi = otherdi
+        self.discardall = discardall
 
     def make(self, depth, trigger):
         return self.otherdi(self.type)
 
     def discard(self):
-        pass
+        if self.discardall:
+            self.otherdi.discardall()
 
 class Creator(Source):
 
