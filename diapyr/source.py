@@ -17,6 +17,7 @@
 
 from .iface import Special, unset
 from .match import wrap
+from .util import innerclass
 try:
     from inspect import getfullargspec as getargspec
 except ImportError:
@@ -75,9 +76,7 @@ class Creator(Source):
             self.di.log.debug("%s Request: %s%s", depth, self.typelabel, '' if trigger == self.type else "(%s)" % Special.gettypelabel(trigger))
             args = self.toargs(*self.instantiator.getdeptypesanddefaults(), depth = "%s%s" % (depth, self.di.depthunit))
             self.di.log.debug("%s %s: %s", depth, type(self.instantiator).__name__, self.typelabel)
-            instance = self.instantiator.fire(args)
-            self.enhance(instance, depth)
-            self.instance = instance
+            self.instance = self.instantiator.fire(args, depth)
         return self.instance
 
     def toargs(self, deptypes, defaults, depth):
@@ -99,6 +98,7 @@ class Creator(Source):
 
 class Class(Creator):
 
+    @innerclass
     class Instantiate(object):
 
         def __init__(self, cls):
@@ -111,26 +111,25 @@ class Class(Creator):
             ctor = self.cls.__init__
             return ctor.di_deptypes, getargspec(ctor).defaults
 
-        def fire(self, args):
-            return self.cls(*args)
+        def fire(self, args, depth):
+            instance = self.cls(*args)
+            methods = {}
+            for name in dir(self.cls):
+                if '__init__' != name:
+                    m = getattr(self.cls, name)
+                    if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
+                        methods[name] = m
+            if methods:
+                self.di.log.debug("%s Enhance: %s", depth, self.typelabel)
+                for ancestor in reversed(self.cls.mro()):
+                    for name in dir(ancestor):
+                        if name in methods:
+                            m = methods.pop(name)
+                            m(instance, *self.toargs(m.di_deptypes, getargspec(m).defaults, depth))
+            return instance
 
     def __init__(self, cls, di):
         super(Class, self).__init__(self.Instantiate(cls), di)
-
-    def enhance(self, instance, depth):
-        methods = {}
-        for name in dir(self.instantiator.cls):
-            if '__init__' != name:
-                m = getattr(self.instantiator.cls, name)
-                if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
-                    methods[name] = m
-        if methods:
-            self.di.log.debug("%s Enhance: %s", depth, self.typelabel)
-            for ancestor in reversed(self.instantiator.cls.mro()):
-                for name in dir(ancestor):
-                    if name in methods:
-                        m = methods.pop(name)
-                        m(instance, *self.toargs(m.di_deptypes, getargspec(m).defaults, depth))
 
 class Factory(Creator):
 
@@ -145,14 +144,11 @@ class Factory(Creator):
         def getdeptypesanddefaults(self):
             return self.function.di_deptypes, getargspec(self.function).defaults
 
-        def fire(self, args):
+        def fire(self, args, depth):
             return self.function(*args)
 
     def __init__(self, function, di):
         super(Factory, self).__init__(self.Fabricate(function), di)
-
-    def enhance(self, instance, depth):
-        pass
 
 class Builder(Creator):
 
@@ -168,11 +164,8 @@ class Builder(Creator):
         def getdeptypesanddefaults(self):
             return (self.receivermatch,) + self.method.di_deptypes, getargspec(self.method).defaults
 
-        def fire(self, args):
+        def fire(self, args, depth):
             return self.method(*args)
 
     def __init__(self, receivertype, method, di):
         super(Builder, self).__init__(self.Build(receivertype, method), di)
-
-    def enhance(self, instance, depth):
-        pass
