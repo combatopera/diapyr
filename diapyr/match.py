@@ -22,7 +22,7 @@ class BaseGetAll:
     def __init__(self, clazz):
         self.clazz = clazz
 
-    def getall(self, di, depth):
+    def di_all(self, di, depth):
         return [source.make(depth, self.clazz) for source in di.typetosources.get(self.clazz, []) if self.acceptsource(source)]
 
 class GetAll(BaseGetAll):
@@ -33,12 +33,12 @@ class GetAll(BaseGetAll):
 class AllInstancesOf(GetAll):
 
     def di_get(self, di, default, depth):
-        return self.getall(di, depth)
+        return self.di_all(di, depth)
 
 class One:
 
     def di_get(self, di, default, depth):
-        objs = self.getall(di, depth)
+        objs = self.di_all(di, depth)
         if not objs:
             if default is not unset:
                 return default # XXX: Check ancestors first?

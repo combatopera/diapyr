@@ -16,7 +16,7 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 from .iface import MissingAnnotationException, unset
-from .match import AllInstancesOf, wrap
+from .match import wrap
 from .source import Builder, Class, Factory, Instance, Proxy
 from .start import starter
 from .util import invokeall
@@ -104,7 +104,7 @@ class DI:
             m(obj)
 
     def all(self, type):
-        return AllInstancesOf(type).getall(self, self.depthunit)
+        return wrap(type).di_all(self, self.depthunit)
 
     def __call__(self, clazz):
         return wrap(clazz).di_get(self, unset, self.depthunit)
