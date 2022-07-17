@@ -23,7 +23,7 @@ from .util import ispy2
 from unittest import TestCase
 import sys
 
-def add(di, obj):
+def _add(di, obj):
     methods = list(di._addmethods(obj))
     di.add(obj)
     return methods
@@ -43,12 +43,12 @@ class TestDI(TestCase):
         self.assertEqual([], di.all(Unicode))
         self.assertEqual([], di.all(Basestring))
         self.assertEqual([], di.all(list))
-        self.assertEqual([di.addinstance], add(di, Str('hmm')))
+        self.assertEqual([di.addinstance], _add(di, Str('hmm')))
         self.assertEqual([Str('hmm')], di.all(Str))
         self.assertEqual([], di.all(Unicode))
         self.assertEqual([Str('hmm')], di.all(Basestring))
         self.assertEqual([], di.all(list))
-        self.assertEqual([di.addinstance], add(di, Unicode('hmmm')))
+        self.assertEqual([di.addinstance], _add(di, Unicode('hmmm')))
         self.assertEqual([Str('hmm')], di.all(Str))
         self.assertEqual([Unicode('hmmm')], di.all(Unicode))
         self.assertEqual([Str('hmm'), Unicode('hmmm')], di.all(Basestring))
@@ -60,8 +60,8 @@ class TestDI(TestCase):
             def __init__(self, dep):
                 self.dep = dep
         di = DI()
-        self.assertEqual([di.addclass], add(di, Hmm))
-        self.assertEqual([di.addinstance], add(di, 'hmm'))
+        self.assertEqual([di.addclass], _add(di, Hmm))
+        self.assertEqual([di.addinstance], _add(di, 'hmm'))
         hmm = di(Hmm)
         self.assertEqual('hmm', hmm.dep)
         self.assertIs(hmm, di(Hmm))
@@ -85,8 +85,8 @@ class TestDI(TestCase):
             def __init__(self, hasval):
                 self.val = hasval.val
         di = DI()
-        self.assertEqual([di.addinstance, di.addclass], add(di, Impl))
-        self.assertEqual([di.addclass], add(di, Hmm))
+        self.assertEqual([di.addinstance, di.addclass], _add(di, Impl))
+        self.assertEqual([di.addclass], _add(di, Hmm))
         self.assertEqual('implval', di(Hmm).val)
         del Impl.__init__
         self.assertEqual([di.addinstance], list(di._addmethods(Impl)))
@@ -99,7 +99,7 @@ class TestDI(TestCase):
         def factory(n):
             return N(n) if n < 0 else P(n)
         di = DI()
-        self.assertEqual([di.addfactory], add(di, factory))
+        self.assertEqual([di.addfactory], _add(di, factory))
         di.add(5)
         i = di(I) # No spin as DI thinks factory is I only.
         self.assertIs(P, i.__class__)
