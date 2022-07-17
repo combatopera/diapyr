@@ -66,17 +66,16 @@ class Creator(Source):
     instance = unset
 
     def __init__(self, callable, di):
-        instantiator = self.Instantiator(callable)
-        super(Creator, self).__init__(instantiator.getowntype())
-        self.callable = instantiator.callable
+        self.instantiator = self.Instantiator(callable)
+        super(Creator, self).__init__(self.instantiator.getowntype())
         self.di = di
 
     def make(self, depth, trigger):
         if self.instance is unset:
             self.di.log.debug("%s Request: %s%s", depth, self.typelabel, '' if trigger == self.type else "(%s)" % Special.gettypelabel(trigger))
-            args = self.toargs(*self.getdeptypesanddefaults(self.callable), depth = "%s%s" % (depth, self.di.depthunit))
+            args = self.toargs(*self.getdeptypesanddefaults(self.instantiator.callable), depth = "%s%s" % (depth, self.di.depthunit))
             self.di.log.debug("%s %s: %s", depth, self.action, self.typelabel)
-            instance = self.callable(*args)
+            instance = self.instantiator.callable(*args)
             self.enhance(instance, depth)
             self.instance = instance
         return self.instance
@@ -120,14 +119,14 @@ class Class(Creator):
 
     def enhance(self, instance, depth):
         methods = {}
-        for name in dir(self.callable):
+        for name in dir(self.instantiator.callable):
             if '__init__' != name:
-                m = getattr(self.callable, name)
+                m = getattr(self.instantiator.callable, name)
                 if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
                     methods[name] = m
         if methods:
             self.di.log.debug("%s Enhance: %s", depth, self.typelabel)
-            for ancestor in reversed(self.callable.mro()):
+            for ancestor in reversed(self.instantiator.callable.mro()):
                 for name in dir(ancestor):
                     if name in methods:
                         m = methods.pop(name)
