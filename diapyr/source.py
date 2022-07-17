@@ -67,7 +67,7 @@ class Creator(Source):
     instance = unset
 
     def __init__(self, instantiator, di):
-        super(Creator, self).__init__(instantiator.getowntype())
+        super(Creator, self).__init__(instantiator.resulttype)
         self.instantiator = instantiator
         self.di = di
 
@@ -101,6 +101,10 @@ class Class(Creator):
     @innerclass
     class Instantiate(object):
 
+        @property
+        def resulttype(self):
+            return self.cls
+
         def __init__(self, cls):
             self.methods = {}
             for name in dir(cls):
@@ -109,9 +113,6 @@ class Class(Creator):
                     if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
                         self.methods[name] = m
             self.cls = cls
-
-        def getowntype(self):
-            return self.cls
 
         def getdeptypesanddefaults(self):
             ctor = self.cls.__init__
@@ -136,11 +137,12 @@ class Factory(Creator):
 
     class Fabricate(object):
 
+        @property
+        def resulttype(self):
+            return self.function.di_owntype
+
         def __init__(self, function):
             self.function = function
-
-        def getowntype(self):
-            return self.function.di_owntype
 
         def getdeptypesanddefaults(self):
             return self.function.di_deptypes, getargspec(self.function).defaults
@@ -155,12 +157,13 @@ class Builder(Creator):
 
     class Build(object):
 
+        @property
+        def resulttype(self):
+            return self.method.di_owntype
+
         def __init__(self, receivertype, method):
             self.receivermatch = wrap(receivertype)
             self.method = method
-
-        def getowntype(self):
-            return self.method.di_owntype
 
         def getdeptypesanddefaults(self):
             return (self.receivermatch,) + self.method.di_deptypes, getargspec(self.method).defaults
