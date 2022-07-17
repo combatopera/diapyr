@@ -17,7 +17,7 @@
 
 from .iface import UnsatisfiableRequestException, unset
 
-class AllInstancesOf:
+class GetAll:
 
     def __init__(self, clazz):
         self.clazz = clazz
@@ -25,13 +25,15 @@ class AllInstancesOf:
     def getall(self, di, depth):
         return [source.make(depth, self.clazz) for source in di.typetosources.get(self.clazz, [])]
 
+class AllInstancesOf(GetAll):
+
     def di_get(self, di, default, depth):
         return self.getall(di, depth)
 
 class One:
 
     def di_get(self, di, default, depth):
-        objs = self.many(di, depth)
+        objs = self.getall(di, depth)
         if not objs:
             if default is not unset:
                 return default # XXX: Check ancestors first?
@@ -41,24 +43,14 @@ class One:
             raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (self.clazz, len(objs))) # FIXME: Untested!
         return objs[0]
 
-class OneInstanceOf(One):
-
-    @property
-    def clazz(self):
-        return self.all.clazz
-
-    def __init__(self, clazz):
-        self.all = AllInstancesOf(clazz)
-
-    def many(self, di, depth):
-        return self.all.getall(di, depth)
+class OneInstanceOf(GetAll, One): pass
 
 class ExactMatch(One):
 
     def __init__(self, clazz):
         self.clazz = clazz
 
-    def many(self, di, depth):
+    def getall(self, di, depth):
         return [source.make(depth, self.clazz) for source in di.typetosources.get(self.clazz, []) if self.clazz == source.type]
 
 def wrap(obj):
