@@ -359,9 +359,10 @@ class TestDI(TestCase):
         self.assertEqual((1.5, 3), di(Y))
 
     def test_toomany(self):
+        allow = False
         class A:
             @types()
-            def __init__(self): pass
+            def __init__(self): assert allow
         class B(A): pass
         class C(A): pass
         di = DI()
@@ -369,6 +370,7 @@ class TestDI(TestCase):
         di.add(C)
         with self.assertRaises(UnsatisfiableRequestException):
             di(A)
+        allow = True
         self.assertEqual([B, C], [x.__class__ for x in di.all(A)])
 
     def test_discardinstance(self):
