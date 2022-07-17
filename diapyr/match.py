@@ -22,8 +22,8 @@ class BaseGetAll:
     def __init__(self, clazz):
         self.clazz = clazz
 
-    def di_all(self, di, depth):
-        return [source.make(depth, self.clazz) for source in di.typetosources.get(self.clazz, []) if self.acceptsource(source)]
+    def getsources(self, di):
+        return [source for source in di.typetosources.get(self.clazz, []) if self.acceptsource(source)]
 
 class GetAll(BaseGetAll):
 
@@ -33,20 +33,20 @@ class GetAll(BaseGetAll):
 class AllInstancesOf(GetAll):
 
     def di_get(self, di, default, depth):
-        return self.di_all(di, depth)
+        return [s.make(depth, self.clazz) for s in self.getsources(di)]
 
 class One:
 
     def di_get(self, di, default, depth):
-        objs = self.di_all(di, depth)
-        if not objs:
+        sources = self.getsources(di)
+        if not sources:
             if default is not unset:
                 return default # XXX: Check ancestors first?
             if di.parent is not None:
                 return self.di_get(di.parent, default, depth) # XXX: Is parent thread-safe?
-        if 1 != len(objs):
-            raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (self.clazz, len(objs))) # FIXME: Untested!
-        return objs[0]
+        if 1 != len(sources):
+            raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (self.clazz, len(sources))) # FIXME: Untested!
+        return sources[0].make(depth, self.clazz)
 
 class OneInstanceOf(GetAll, One): pass
 
