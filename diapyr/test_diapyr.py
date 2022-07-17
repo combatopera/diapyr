@@ -368,8 +368,9 @@ class TestDI(TestCase):
         di = DI()
         di.add(B)
         di.add(C)
-        with self.assertRaises(UnsatisfiableRequestException):
+        with self.assertRaises(UnsatisfiableRequestException) as cm:
             di(A)
+        self.assertEqual(("Expected 1 object of type %s but got: 2" % A,), cm.exception.args)
         allow = True
         self.assertEqual([B, C], [x.__class__ for x in di.all(A)])
 
