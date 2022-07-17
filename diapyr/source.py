@@ -99,7 +99,7 @@ class Creator(Source):
 
 class Class(Creator):
 
-    class Instantiate:
+    class Instantiate(object):
 
         @property
         def callable(self):
@@ -135,7 +135,7 @@ class Class(Creator):
 
 class Factory(Creator):
 
-    class Fabricate:
+    class Fabricate(object):
 
         @property
         def callable(self):
@@ -159,7 +159,7 @@ class Factory(Creator):
 
 class Builder(Creator):
 
-    class Build:
+    class Build(object):
 
         @property
         def callable(self):
