@@ -29,17 +29,14 @@ class Proxy(object):
             try:
                 supergetattr = superclass.__getattr__
             except AttributeError:
-                raise AttributeError("'%s' object has no attribute '%s'" % (self._clsname, name))
+                raise AttributeError("'%s' object has no attribute '%s'" % (type(self).__name__, name))
             return supergetattr(name)
 
 def innerclass(cls):
     class InnerMeta(type):
         def __get__(self, enclosinginstance, owner):
             clsname = (cls if self is Inner else self).__name__
-            return type(clsname, (Proxy, self), dict(
-                _clsname = clsname,
-                _enclosinginstance = enclosinginstance,
-            ))
+            return type(clsname, (Proxy, self), dict(_enclosinginstance = enclosinginstance))
     g = dict(cls = cls, InnerMeta = InnerMeta)
     exec('class Inner(cls): __metaclass__ = InnerMeta' if ispy2 else 'class Inner(cls, metaclass = InnerMeta): pass', g)
     Inner = g['Inner']
