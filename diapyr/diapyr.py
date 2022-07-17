@@ -64,12 +64,12 @@ class DI:
         if getattr(clazz, 'start', None) is not None:
             self.addclass(starter(clazz))
 
-    def _addbuilders(self, clazz):
-        for name in dir(clazz):
-            m = getattr(clazz, name)
+    def _addbuilders(self, cls):
+        for name in dir(cls):
+            m = getattr(cls, name)
             if hasattr(m, 'di_deptypes') and hasattr(m, 'di_owntype'):
                 assert '__init__' != name # TODO LATER: Check upfront.
-                self.addsource(Builder(clazz, m, self))
+                self.addsource(Builder(cls, m, self))
 
     def addinstance(self, instance, type = None):
         clazz = instance.__class__ if type is None else type
