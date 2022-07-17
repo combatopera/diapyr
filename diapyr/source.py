@@ -74,7 +74,7 @@ class Creator(Source):
         if self.instance is unset:
             self.di.log.debug("%s Request: %s%s", depth, self.typelabel, '' if trigger == self.type else "(%s)" % Special.gettypelabel(trigger))
             args = self.toargs(*self.getdeptypesanddefaults(self.instantiator.callable), depth = "%s%s" % (depth, self.di.depthunit))
-            self.di.log.debug("%s %s: %s", depth, self.action, self.typelabel)
+            self.di.log.debug("%s %s: %s", depth, type(self.instantiator).__name__, self.typelabel)
             instance = self.instantiator.callable(*args)
             self.enhance(instance, depth)
             self.instance = instance
@@ -99,9 +99,7 @@ class Creator(Source):
 
 class Class(Creator):
 
-    action = 'Instantiate'
-
-    class Instantiator:
+    class Instantiate:
 
         @property
         def callable(self):
@@ -118,7 +116,7 @@ class Class(Creator):
         return ctor.di_deptypes, getargspec(ctor).defaults
 
     def __init__(self, cls, di):
-        super(Class, self).__init__(self.Instantiator(cls), di)
+        super(Class, self).__init__(self.Instantiate(cls), di)
 
     def enhance(self, instance, depth):
         methods = {}
@@ -137,9 +135,7 @@ class Class(Creator):
 
 class Factory(Creator):
 
-    action = 'Fabricate'
-
-    class Instantiator:
+    class Fabricate:
 
         @property
         def callable(self):
@@ -156,16 +152,14 @@ class Factory(Creator):
         return factory.di_deptypes, getargspec(factory).defaults
 
     def __init__(self, function, di):
-        super(Factory, self).__init__(self.Instantiator(function), di)
+        super(Factory, self).__init__(self.Fabricate(function), di)
 
     def enhance(self, instance, depth):
         pass
 
 class Builder(Creator):
 
-    action = 'Build'
-
-    class Instantiator:
+    class Build:
 
         @property
         def callable(self):
@@ -181,7 +175,7 @@ class Builder(Creator):
         return (self.receivermatch,) + factory.di_deptypes, getargspec(factory).defaults
 
     def __init__(self, receivertype, method, di):
-        super(Builder, self).__init__(self.Instantiator(method), di)
+        super(Builder, self).__init__(self.Build(method), di)
         self.receivermatch = wrap(receivertype)
 
     def enhance(self, instance, depth):
