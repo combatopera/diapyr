@@ -17,13 +17,18 @@
 
 from .iface import UnsatisfiableRequestException, unset
 
-class GetAll:
+class BaseGetAll:
 
     def __init__(self, clazz):
         self.clazz = clazz
 
     def getall(self, di, depth):
-        return [source.make(depth, self.clazz) for source in di.typetosources.get(self.clazz, [])]
+        return [source.make(depth, self.clazz) for source in di.typetosources.get(self.clazz, []) if self.acceptsource(source)]
+
+class GetAll(BaseGetAll):
+
+    def acceptsource(self, source):
+        return True
 
 class AllInstancesOf(GetAll):
 
@@ -45,13 +50,10 @@ class One:
 
 class OneInstanceOf(GetAll, One): pass
 
-class ExactMatch(One):
+class ExactMatch(BaseGetAll, One):
 
-    def __init__(self, clazz):
-        self.clazz = clazz
-
-    def getall(self, di, depth):
-        return [source.make(depth, self.clazz) for source in di.typetosources.get(self.clazz, []) if self.clazz == source.type]
+    def acceptsource(self, source):
+        return self.clazz == source.type
 
 def wrap(obj):
     if list == type(obj):
