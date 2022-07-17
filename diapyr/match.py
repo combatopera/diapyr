@@ -45,7 +45,7 @@ class One:
             if di.parent is not None:
                 return self.di_get(di.parent, default, depth) # XXX: Is parent thread-safe?
         if 1 != len(sources):
-            raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (self.clazz, len(sources))) # FIXME: Untested!
+            raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (self.clazz, len(sources)))
         return sources[0].make(depth, self.clazz)
 
 class OneInstanceOf(GetAll, One): pass
