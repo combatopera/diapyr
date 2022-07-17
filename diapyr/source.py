@@ -66,8 +66,9 @@ class Creator(Source):
     instance = unset
 
     def __init__(self, callable, di):
-        super(Creator, self).__init__(self.Instantiator(callable).getowntype())
-        self.callable = callable
+        instantiator = self.Instantiator(callable)
+        super(Creator, self).__init__(instantiator.getowntype())
+        self.callable = instantiator.callable
         self.di = di
 
     def make(self, depth, trigger):
@@ -103,6 +104,10 @@ class Class(Creator):
 
     class Instantiator:
 
+        @property
+        def callable(self):
+            return self.cls
+
         def __init__(self, cls):
             self.cls = cls
 
@@ -134,6 +139,10 @@ class Factory(Creator):
 
     class Instantiator:
 
+        @property
+        def callable(self):
+            return self.factory
+
         def __init__(self, factory):
             self.factory = factory
 
@@ -156,6 +165,10 @@ class Builder(Creator):
         self.receivermatch = wrap(receivertype)
 
     class Instantiator:
+
+        @property
+        def callable(self):
+            return self.factory
 
         def __init__(self, factory):
             self.factory = factory
