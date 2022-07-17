@@ -22,6 +22,7 @@ try:
     from inspect import getfullargspec as getargspec
 except ImportError:
     from inspect import getargspec
+from itertools import chain, repeat
 
 class Source(object):
 
@@ -80,10 +81,12 @@ class Creator(Source):
         return self.instance
 
     def toargs(self, deptypes, defaults, depth):
-        if defaults:
-            args = [t.di_get(self.di, unset, depth) for t in deptypes[:-len(defaults)]]
-            return args + [t.di_get(self.di, default, depth) for t, default in zip(deptypes[-len(defaults):], defaults)]
-        return [t.di_get(self.di, unset, depth) for t in deptypes]
+        if defaults is None:
+            defaults = ()
+        return [t.di_get(self.di, default, depth) for t, default in zip(
+            deptypes,
+            chain(repeat(unset, len(deptypes) - len(defaults)), defaults),
+        )]
 
     def discard(self):
         instance, self.instance = self.instance, unset
