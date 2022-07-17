@@ -120,14 +120,14 @@ class Class(Creator):
 
     def enhance(self, instance, depth):
         methods = {}
-        for name in dir(self.instantiator.callable):
+        for name in dir(self.instantiator.cls):
             if '__init__' != name:
-                m = getattr(self.instantiator.callable, name)
+                m = getattr(self.instantiator.cls, name)
                 if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
                     methods[name] = m
         if methods:
             self.di.log.debug("%s Enhance: %s", depth, self.typelabel)
-            for ancestor in reversed(self.instantiator.callable.mro()):
+            for ancestor in reversed(self.instantiator.cls.mro()):
                 for name in dir(ancestor):
                     if name in methods:
                         m = methods.pop(name)
