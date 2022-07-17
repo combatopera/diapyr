@@ -102,6 +102,12 @@ class Class(Creator):
     class Instantiate(object):
 
         def __init__(self, cls):
+            self.methods = {}
+            for name in dir(cls):
+                if '__init__' != name:
+                    m = getattr(cls, name)
+                    if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
+                        self.methods[name] = m
             self.cls = cls
 
         def getowntype(self):
@@ -113,13 +119,8 @@ class Class(Creator):
 
         def fire(self, args, depth):
             instance = self.cls(*args)
-            methods = {}
-            for name in dir(self.cls):
-                if '__init__' != name:
-                    m = getattr(self.cls, name)
-                    if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
-                        methods[name] = m
-            if methods:
+            if self.methods:
+                methods = self.methods.copy()
                 self.di.log.debug("%s Enhance: %s", depth, self.typelabel)
                 for ancestor in reversed(self.cls.mro()):
                     for name in dir(ancestor):
