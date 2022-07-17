@@ -73,7 +73,7 @@ class Creator(Source):
     def make(self, depth, trigger):
         if self.instance is unset:
             self.di.log.debug("%s Request: %s%s", depth, self.typelabel, '' if trigger == self.type else "(%s)" % Special.gettypelabel(trigger))
-            args = self.toargs(*self.getdeptypesanddefaults(self.instantiator.callable), depth = "%s%s" % (depth, self.di.depthunit))
+            args = self.toargs(*self.instantiator.getdeptypesanddefaults(), depth = "%s%s" % (depth, self.di.depthunit))
             self.di.log.debug("%s %s: %s", depth, type(self.instantiator).__name__, self.typelabel)
             instance = self.instantiator.callable(*args)
             self.enhance(instance, depth)
@@ -111,9 +111,9 @@ class Class(Creator):
         def getowntype(self):
             return self.cls
 
-    def getdeptypesanddefaults(self, clazz):
-        ctor = clazz.__init__
-        return ctor.di_deptypes, getargspec(ctor).defaults
+        def getdeptypesanddefaults(self):
+            ctor = self.cls.__init__
+            return ctor.di_deptypes, getargspec(ctor).defaults
 
     def __init__(self, cls, di):
         super(Class, self).__init__(self.Instantiate(cls), di)
@@ -147,9 +147,8 @@ class Factory(Creator):
         def getowntype(self):
             return self.function.di_owntype
 
-    @staticmethod
-    def getdeptypesanddefaults(factory):
-        return factory.di_deptypes, getargspec(factory).defaults
+        def getdeptypesanddefaults(self):
+            return self.function.di_deptypes, getargspec(self.function).defaults
 
     def __init__(self, function, di):
         super(Factory, self).__init__(self.Fabricate(function), di)
@@ -165,18 +164,18 @@ class Builder(Creator):
         def callable(self):
             return self.method
 
-        def __init__(self, method):
+        def __init__(self, receivertype, method):
+            self.receivermatch = wrap(receivertype)
             self.method = method
 
         def getowntype(self):
             return self.method.di_owntype
 
-    def getdeptypesanddefaults(self, factory):
-        return (self.receivermatch,) + factory.di_deptypes, getargspec(factory).defaults
+        def getdeptypesanddefaults(self):
+            return (self.receivermatch,) + self.method.di_deptypes, getargspec(self.method).defaults
 
     def __init__(self, receivertype, method, di):
-        super(Builder, self).__init__(self.Build(method), di)
-        self.receivermatch = wrap(receivertype)
+        super(Builder, self).__init__(self.Build(receivertype, method), di)
 
     def enhance(self, instance, depth):
         pass
