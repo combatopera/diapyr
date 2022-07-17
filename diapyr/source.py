@@ -109,12 +109,6 @@ class Class(Creator):
             return self.cls
 
         def __init__(self, cls):
-            self.methods = {}
-            for name in dir(cls):
-                if '__init__' != name:
-                    m = getattr(cls, name)
-                    if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
-                        self.methods[name] = m
             self.cls = cls
 
         def getdeptypesanddefaults(self):
@@ -122,9 +116,14 @@ class Class(Creator):
             return ctor.di_deptypes, getargspec(ctor).defaults
 
         def fire(self, args, depth):
+            methods = {}
+            for name in dir(self.cls):
+                if '__init__' != name:
+                    m = getattr(self.cls, name)
+                    if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
+                        methods[name] = m
             instance = self.cls(*args)
-            if self.methods:
-                methods = self.methods.copy()
+            if methods:
                 self.di.log.debug("%s Enhance: %s", depth, self.typelabel)
                 for ancestor in reversed(self.cls.mro()):
                     for name in dir(ancestor):
