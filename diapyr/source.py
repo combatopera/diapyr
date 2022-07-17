@@ -139,13 +139,13 @@ class Factory(Creator):
 
         @property
         def callable(self):
-            return self.factory
+            return self.function
 
-        def __init__(self, factory):
-            self.factory = factory
+        def __init__(self, function):
+            self.function = function
 
         def getowntype(self):
-            return self.factory.di_owntype
+            return self.function.di_owntype
 
     @staticmethod
     def getdeptypesanddefaults(factory):
@@ -163,13 +163,13 @@ class Builder(Creator):
 
         @property
         def callable(self):
-            return self.factory
+            return self.method
 
-        def __init__(self, factory):
-            self.factory = factory
+        def __init__(self, method):
+            self.method = method
 
         def getowntype(self):
-            return self.factory.di_owntype
+            return self.method.di_owntype
 
     def getdeptypesanddefaults(self, factory):
         return (self.receivermatch,) + factory.di_deptypes, getargspec(factory).defaults
