@@ -75,7 +75,7 @@ class Creator(Source):
             self.di.log.debug("%s Request: %s%s", depth, self.typelabel, '' if trigger == self.type else "(%s)" % Special.gettypelabel(trigger))
             args = self.toargs(*self.instantiator.getdeptypesanddefaults(), depth = "%s%s" % (depth, self.di.depthunit))
             self.di.log.debug("%s %s: %s", depth, type(self.instantiator).__name__, self.typelabel)
-            instance = self.instantiator.callable(*args)
+            instance = self.instantiator.fire(args)
             self.enhance(instance, depth)
             self.instance = instance
         return self.instance
@@ -101,10 +101,6 @@ class Class(Creator):
 
     class Instantiate(object):
 
-        @property
-        def callable(self):
-            return self.cls
-
         def __init__(self, cls):
             self.cls = cls
 
@@ -114,6 +110,9 @@ class Class(Creator):
         def getdeptypesanddefaults(self):
             ctor = self.cls.__init__
             return ctor.di_deptypes, getargspec(ctor).defaults
+
+        def fire(self, args):
+            return self.cls(*args)
 
     def __init__(self, cls, di):
         super(Class, self).__init__(self.Instantiate(cls), di)
@@ -137,10 +136,6 @@ class Factory(Creator):
 
     class Fabricate(object):
 
-        @property
-        def callable(self):
-            return self.function
-
         def __init__(self, function):
             self.function = function
 
@@ -149,6 +144,9 @@ class Factory(Creator):
 
         def getdeptypesanddefaults(self):
             return self.function.di_deptypes, getargspec(self.function).defaults
+
+        def fire(self, args):
+            return self.function(*args)
 
     def __init__(self, function, di):
         super(Factory, self).__init__(self.Fabricate(function), di)
@@ -160,10 +158,6 @@ class Builder(Creator):
 
     class Build(object):
 
-        @property
-        def callable(self):
-            return self.method
-
         def __init__(self, receivertype, method):
             self.receivermatch = wrap(receivertype)
             self.method = method
@@ -173,6 +167,9 @@ class Builder(Creator):
 
         def getdeptypesanddefaults(self):
             return (self.receivermatch,) + self.method.di_deptypes, getargspec(self.method).defaults
+
+        def fire(self, args):
+            return self.method(*args)
 
     def __init__(self, receivertype, method, di):
         super(Builder, self).__init__(self.Build(receivertype, method), di)
