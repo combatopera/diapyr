@@ -103,11 +103,11 @@ class Class(Creator):
 
     class Instantiator:
 
-        def __init__(self, clazz):
-            self.clazz = clazz
+        def __init__(self, cls):
+            self.cls = cls
 
         def getowntype(self):
-            return self.clazz
+            return self.cls
 
     def getdeptypesanddefaults(self, clazz):
         ctor = clazz.__init__
