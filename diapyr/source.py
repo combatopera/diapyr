@@ -26,12 +26,12 @@ except ImportError:
 class Source(object):
 
     def __init__(self, type):
-        self.types = set()
         def addtype(type):
             self.types.add(type)
             for base in type.__bases__:
                 if base not in self.types:
                     addtype(base)
+        self.types = set()
         addtype(type)
         self.typelabel = Special.gettypelabel(type)
         self.type = type
