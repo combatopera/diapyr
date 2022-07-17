@@ -125,8 +125,11 @@ class Class(Creator):
                 self.di.log.debug("%s Enhance: %s", depth, self.typelabel)
                 for ancestor in reversed(self.cls.mro()):
                     for name in dir(ancestor):
-                        if name in methods:
+                        try:
                             m = methods.pop(name)
+                        except KeyError:
+                            pass
+                        else:
                             m(instance, *self.toargs(m.di_deptypes, getargspec(m).defaults, depth))
             return instance
 
