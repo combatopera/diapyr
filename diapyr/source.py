@@ -65,9 +65,9 @@ class Creator(Source):
 
     instance = unset
 
-    def __init__(self, callable, di):
-        self.instantiator = self.Instantiator(callable)
-        super(Creator, self).__init__(self.instantiator.getowntype())
+    def __init__(self, instantiator, di):
+        super(Creator, self).__init__(instantiator.getowntype())
+        self.instantiator = instantiator
         self.di = di
 
     def make(self, depth, trigger):
@@ -117,6 +117,9 @@ class Class(Creator):
         ctor = clazz.__init__
         return ctor.di_deptypes, getargspec(ctor).defaults
 
+    def __init__(self, cls, di):
+        super(Class, self).__init__(self.Instantiator(cls), di)
+
     def enhance(self, instance, depth):
         methods = {}
         for name in dir(self.instantiator.callable):
@@ -152,16 +155,15 @@ class Factory(Creator):
     def getdeptypesanddefaults(factory):
         return factory.di_deptypes, getargspec(factory).defaults
 
+    def __init__(self, function, di):
+        super(Factory, self).__init__(self.Instantiator(function), di)
+
     def enhance(self, instance, depth):
         pass
 
 class Builder(Creator):
 
     action = 'Build'
-
-    def __init__(self, receivertype, method, di):
-        super(Builder, self).__init__(method, di)
-        self.receivermatch = wrap(receivertype)
 
     class Instantiator:
 
@@ -177,6 +179,10 @@ class Builder(Creator):
 
     def getdeptypesanddefaults(self, factory):
         return (self.receivermatch,) + factory.di_deptypes, getargspec(factory).defaults
+
+    def __init__(self, receivertype, method, di):
+        super(Builder, self).__init__(self.Instantiator(method), di)
+        self.receivermatch = wrap(receivertype)
 
     def enhance(self, instance, depth):
         pass
