@@ -66,7 +66,7 @@ class Creator(Source):
     instance = unset
 
     def __init__(self, callable, di):
-        super(Creator, self).__init__(self.getowntype(callable))
+        super(Creator, self).__init__(self.Instantiator(callable).getowntype())
         self.callable = callable
         self.di = di
 
@@ -101,9 +101,13 @@ class Class(Creator):
 
     action = 'Instantiate'
 
-    @staticmethod
-    def getowntype(clazz):
-        return clazz
+    class Instantiator:
+
+        def __init__(self, clazz):
+            self.clazz = clazz
+
+        def getowntype(self):
+            return self.clazz
 
     def getdeptypesanddefaults(self, clazz):
         ctor = clazz.__init__
@@ -128,9 +132,13 @@ class Factory(Creator):
 
     action = 'Fabricate'
 
-    @staticmethod
-    def getowntype(factory):
-        return factory.di_owntype
+    class Instantiator:
+
+        def __init__(self, factory):
+            self.factory = factory
+
+        def getowntype(self):
+            return self.factory.di_owntype
 
     @staticmethod
     def getdeptypesanddefaults(factory):
@@ -147,9 +155,13 @@ class Builder(Creator):
         super(Builder, self).__init__(method, di)
         self.receivermatch = wrap(receivertype)
 
-    @staticmethod
-    def getowntype(factory):
-        return factory.di_owntype
+    class Instantiator:
+
+        def __init__(self, factory):
+            self.factory = factory
+
+        def getowntype(self):
+            return self.factory.di_owntype
 
     def getdeptypesanddefaults(self, factory):
         return (self.receivermatch,) + factory.di_deptypes, getargspec(factory).defaults
