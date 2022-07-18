@@ -374,6 +374,13 @@ class TestDI(TestCase):
         allow = True
         self.assertEqual([B, C], [x.__class__ for x in di.all(A)])
 
+    def test_notenough(self):
+        class A: pass
+        di = DI()
+        with self.assertRaises(UnsatisfiableRequestException) as cm:
+            di(A)
+        self.assertEqual(("Expected 1 object of type %s but got: 0" % A,), cm.exception.args)
+
     def test_discardinstance(self):
         discards = []
         def intercept():
