@@ -493,3 +493,20 @@ self.assertEqual(['woo', log], di(int))''')
             self.assertIs(b, subdi(B))
             self.assertFalse(disposed)
         self.assertEqual([b, a], disposed)
+
+    def test_lastresort(self):
+        log = object()
+        class L: pass
+        class A:
+            @types(L)
+            def __init__(self, log = log):
+                self.log = log
+        with DI() as di:
+            with DI(di) as di2:
+                di2.add(A)
+                self.assertIs(log, di2(A).log)
+            l = L()
+            di.add(l)
+            with DI(di) as di3:
+                di3.add(A)
+                self.assertIs(l, di3(A).log)

@@ -40,10 +40,10 @@ class One:
     def di_get(self, di, default, depth):
         sources = self.getsources(di)
         if not sources:
-            if default is not unset:
-                return default # XXX: Check ancestors first?
             if di.parent is not None:
                 return self.di_get(di.parent, default, depth) # XXX: Is parent thread-safe?
+            if default is not unset:
+                return default
         if 1 != len(sources):
             raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (self.clazz, len(sources)))
         return sources[0].make(depth, self.clazz)
