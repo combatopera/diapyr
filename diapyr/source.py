@@ -113,18 +113,15 @@ class Class(Creator):
 
         def plan(self, depth):
             ctor = self.cls.__init__
-            return self.toargs(depth, ctor.di_deptypes, getargspec(ctor).defaults)
-
-        def fire(self, depth, *args):
             methods = {}
             for name in dir(self.cls):
                 if '__init__' != name:
                     m = getattr(self.cls, name)
                     if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
                         methods[name] = m
-            instance = self.cls(*args)
+            args = self.toargs(depth, ctor.di_deptypes, getargspec(ctor).defaults)
+            enhancers = []
             if methods:
-                self.di.log.debug("%s Enhance: %s", depth, self.typelabel)
                 for ancestor in reversed(self.cls.mro()):
                     for name in dir(ancestor):
                         try:
@@ -132,7 +129,15 @@ class Class(Creator):
                         except KeyError:
                             pass
                         else:
-                            m(instance, *self.toargs(depth, m.di_deptypes, getargspec(m).defaults))
+                            enhancers.append([m, self.toargs(depth, m.di_deptypes, getargspec(m).defaults)])
+            return args, enhancers
+
+        def fire(self, depth, args, enhancers):
+            instance = self.cls(*args)
+            if enhancers:
+                self.di.log.debug("%s Enhance: %s", depth, self.typelabel)
+                for m, eargs in enhancers:
+                    m(instance, *eargs)
             return instance
 
     def __init__(self, cls, di):
