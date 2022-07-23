@@ -132,7 +132,7 @@ class Class(Creator):
                         except KeyError:
                             pass
                         else:
-                            m(instance, *self.toargs(m.di_deptypes, getargspec(m).defaults, depth))
+                            m(instance, *self.toargs(depth, m.di_deptypes, getargspec(m).defaults))
             return instance
 
     def __init__(self, cls, di):
