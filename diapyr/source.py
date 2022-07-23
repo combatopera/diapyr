@@ -80,7 +80,7 @@ class Creator(Source):
             self.instance = self.instantiator.fire(args, depth)
         return self.instance
 
-    def toargs(self, deptypes, defaults, depth):
+    def toargs(self, depth, deptypes, defaults):
         if defaults is None:
             defaults = ()
         return [t.di_get(self.di, default, depth) for t, default in zip(
@@ -111,12 +111,9 @@ class Class(Creator):
         def __init__(self, cls):
             self.cls = cls
 
-        def getdeptypesanddefaults(self):
-            ctor = self.cls.__init__
-            return ctor.di_deptypes, getargspec(ctor).defaults
-
         def plan(self, depth):
-            return self.toargs(*self.getdeptypesanddefaults(), depth = depth)
+            ctor = self.cls.__init__
+            return self.toargs(depth, ctor.di_deptypes, getargspec(ctor).defaults)
 
         def fire(self, args, depth):
             methods = {}
@@ -153,11 +150,8 @@ class Factory(Creator):
         def __init__(self, function):
             self.function = function
 
-        def getdeptypesanddefaults(self):
-            return self.function.di_deptypes, getargspec(self.function).defaults
-
         def plan(self, depth):
-            return self.toargs(*self.getdeptypesanddefaults(), depth = depth)
+            return self.toargs(depth, self.function.di_deptypes, getargspec(self.function).defaults)
 
         def fire(self, args, depth):
             return self.function(*args)
@@ -178,11 +172,8 @@ class Builder(Creator):
             self.receivermatch = wrap(receivertype)
             self.method = method
 
-        def getdeptypesanddefaults(self):
-            return (self.receivermatch,) + self.method.di_deptypes, getargspec(self.method).defaults
-
         def plan(self, depth):
-            return self.toargs(*self.getdeptypesanddefaults(), depth = depth)
+            return self.toargs(depth, (self.receivermatch,) + self.method.di_deptypes, getargspec(self.method).defaults)
 
         def fire(self, args, depth):
             return self.method(*args)
