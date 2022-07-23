@@ -75,9 +75,9 @@ class Creator(Source):
     def make(self, depth, trigger):
         if self.instance is unset:
             self.di.log.debug("%s Request: %s%s", depth, self.typelabel, '' if trigger == self.type else "(%s)" % Special.gettypelabel(trigger))
-            args = self.instantiator.plan("%s%s" % (depth, self.di.depthunit))
+            plan = self.instantiator.plan("%s%s" % (depth, self.di.depthunit))
             self.di.log.debug("%s %s: %s", depth, type(self.instantiator).__name__, self.typelabel)
-            self.instance = self.instantiator.fire(args, depth)
+            self.instance = self.instantiator.fire(depth, *plan)
         return self.instance
 
     def toargs(self, depth, deptypes, defaults):
@@ -115,7 +115,7 @@ class Class(Creator):
             ctor = self.cls.__init__
             return self.toargs(depth, ctor.di_deptypes, getargspec(ctor).defaults)
 
-        def fire(self, args, depth):
+        def fire(self, depth, *args):
             methods = {}
             for name in dir(self.cls):
                 if '__init__' != name:
@@ -153,7 +153,7 @@ class Factory(Creator):
         def plan(self, depth):
             return self.toargs(depth, self.function.di_deptypes, getargspec(self.function).defaults)
 
-        def fire(self, args, depth):
+        def fire(self, depth, *args):
             return self.function(*args)
 
     def __init__(self, function, di):
@@ -175,7 +175,7 @@ class Builder(Creator):
         def plan(self, depth):
             return self.toargs(depth, (self.receivermatch,) + self.method.di_deptypes, getargspec(self.method).defaults)
 
-        def fire(self, args, depth):
+        def fire(self, depth, *args):
             return self.method(*args)
 
     def __init__(self, receivertype, method, di):
