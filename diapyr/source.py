@@ -75,7 +75,7 @@ class Creator(Source):
     def make(self, depth, trigger):
         if self.instance is unset:
             self.di.log.debug("%s Request: %s%s", depth, self.typelabel, '' if trigger == self.type else "(%s)" % Special.gettypelabel(trigger))
-            args = self.toargs(*self.instantiator.getdeptypesanddefaults(), depth = "%s%s" % (depth, self.di.depthunit))
+            args = self.instantiator.plan("%s%s" % (depth, self.di.depthunit))
             self.di.log.debug("%s %s: %s", depth, type(self.instantiator).__name__, self.typelabel)
             self.instance = self.instantiator.fire(args, depth)
         return self.instance
@@ -115,6 +115,9 @@ class Class(Creator):
             ctor = self.cls.__init__
             return ctor.di_deptypes, getargspec(ctor).defaults
 
+        def plan(self, depth):
+            return self.toargs(*self.getdeptypesanddefaults(), depth = depth)
+
         def fire(self, args, depth):
             methods = {}
             for name in dir(self.cls):
@@ -140,6 +143,7 @@ class Class(Creator):
 
 class Factory(Creator):
 
+    @innerclass
     class Fabricate(object):
 
         @property
@@ -152,6 +156,9 @@ class Factory(Creator):
         def getdeptypesanddefaults(self):
             return self.function.di_deptypes, getargspec(self.function).defaults
 
+        def plan(self, depth):
+            return self.toargs(*self.getdeptypesanddefaults(), depth = depth)
+
         def fire(self, args, depth):
             return self.function(*args)
 
@@ -160,6 +167,7 @@ class Factory(Creator):
 
 class Builder(Creator):
 
+    @innerclass
     class Build(object):
 
         @property
@@ -172,6 +180,9 @@ class Builder(Creator):
 
         def getdeptypesanddefaults(self):
             return (self.receivermatch,) + self.method.di_deptypes, getargspec(self.method).defaults
+
+        def plan(self, depth):
+            return self.toargs(*self.getdeptypesanddefaults(), depth = depth)
 
         def fire(self, args, depth):
             return self.method(*args)
