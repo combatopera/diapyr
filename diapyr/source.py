@@ -83,10 +83,7 @@ class Creator(Source):
     def toargs(self, depth, deptypes, defaults):
         if defaults is None:
             defaults = ()
-        return [t.di_get(self.di, default, depth) for t, default in zip(
-            deptypes,
-            chain(repeat(unset, len(deptypes) - len(defaults)), defaults),
-        )]
+        return [t.di_get(self.di, default, depth) for t, default in zip(deptypes, chain(repeat(unset, len(deptypes) - len(defaults)), defaults))]
 
     def discard(self):
         instance, self.instance = self.instance, unset
