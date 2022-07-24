@@ -37,9 +37,7 @@ def innerclass(cls):
         def __get__(self, enclosinginstance, owner):
             clsname = (cls if self is Inner else self).__name__
             return type(clsname, (Proxy, self), dict(_enclosinginstance = enclosinginstance))
-    g = dict(cls = cls, InnerMeta = InnerMeta)
-    exec('class Inner(cls): __metaclass__ = InnerMeta' if ispy2 else 'class Inner(cls, metaclass = InnerMeta): pass', g)
-    Inner = g['Inner']
+    Inner = InnerMeta('Inner', (cls,), {})
     return Inner
 
 def singleton(t):
