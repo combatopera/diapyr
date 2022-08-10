@@ -119,7 +119,7 @@ class Class(Creator):
                         m = getattr(self.cls, name)
                         if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
                             methods[name] = m
-                self.args = self.toargs(depth, ctor.di_deptypes, getargspec(ctor).defaults)
+                self.ctorargs = self.toargs(depth, ctor.di_deptypes, getargspec(ctor).defaults)
                 self.enhancers = []
                 if methods:
                     for ancestor in reversed(self.cls.mro()):
@@ -132,7 +132,7 @@ class Class(Creator):
                                 self.enhancers.append([m, self.toargs(depth, m.di_deptypes, getargspec(m).defaults)])
 
             def fire(self, depth):
-                instance = self.cls(*self.args)
+                instance = self.cls(*self.ctorargs)
                 if self.enhancers:
                     self.di.log.debug("%s Enhance: %s", depth, self.typelabel)
                     for m, eargs in self.enhancers:
