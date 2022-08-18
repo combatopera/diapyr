@@ -104,10 +104,13 @@ class DI:
             m(obj)
 
     def all(self, type):
-        return AllInstancesOf(type).di_get(self, unset, self.depthunit)
+        return self._session(AllInstancesOf(type))
 
     def __call__(self, clazz):
-        return wrap(clazz).di_get(self, unset, self.depthunit)
+        return self._session(wrap(clazz))
+
+    def _session(self, match):
+        return match.di_get(self, unset, self.depthunit)
 
     def join(self, type, discardall = True):
         self.parent.addsource(Proxy(self, type, discardall))
