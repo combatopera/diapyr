@@ -457,6 +457,7 @@ self.assertEqual(['woo', log], di(int))''')
         self.assertIs(x, c.x)
 
     def test_proxy(self):
+        self.debugs = []
         disposed = []
         class D:
             def dispose(self): disposed.append(self)
@@ -467,8 +468,10 @@ self.assertEqual(['woo', log], di(int))''')
             @types(A)
             def __init__(self, a): self.a = a
         with DI() as di:
+            di.log = self
             di.add(A)
             with DI(di) as subdi:
+                subdi.log = self
                 subdi.add(B)
                 subdi.join(B, False)
                 b = di(B)
@@ -478,8 +481,17 @@ self.assertEqual(['woo', log], di(int))''')
                 self.assertFalse(disposed)
             self.assertEqual([b], disposed)
         self.assertEqual([b, a], disposed)
+        self.assertEqual([
+            ('%s Request: %s%s', '>', 'diapyr.test_diapyr.B', ''),
+            ('%s Request: %s%s', '>>', 'diapyr.test_diapyr.A', ''),
+            ('%s %s: %s', '>>', 'Instantiate', 'diapyr.test_diapyr.A'),
+            ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.B'),
+            ('Dispose: %s', 'diapyr.test_diapyr.B'),
+            ('Dispose: %s', 'diapyr.test_diapyr.A'),
+        ], self.debugs)
 
     def test_proxy2(self):
+        self.debugs = []
         disposed = []
         class D:
             def dispose(self): disposed.append(self)
@@ -490,8 +502,10 @@ self.assertEqual(['woo', log], di(int))''')
             @types(A)
             def __init__(self, a): self.a = a
         with DI() as di:
+            di.log = self
             di.add(A)
             subdi = DI(di)
+            subdi.log = self
             subdi.add(B)
             subdi.join(B)
             b = di(B)
@@ -500,6 +514,14 @@ self.assertEqual(['woo', log], di(int))''')
             self.assertIs(b, subdi(B))
             self.assertFalse(disposed)
         self.assertEqual([b, a], disposed)
+        self.assertEqual([
+            ('%s Request: %s%s', '>', 'diapyr.test_diapyr.B', ''),
+            ('%s Request: %s%s', '>>', 'diapyr.test_diapyr.A', ''),
+            ('%s %s: %s', '>>', 'Instantiate', 'diapyr.test_diapyr.A'),
+            ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.B'),
+            ('Dispose: %s', 'diapyr.test_diapyr.B'),
+            ('Dispose: %s', 'diapyr.test_diapyr.A'),
+        ], self.debugs)
 
     def test_lastresort(self):
         log = object()
