@@ -232,9 +232,12 @@ class TestDI(TestCase):
 
     def test_logging(self):
         self.debugs = []
-        class A:
+        class Z:
             @types()
             def __init__(self): pass
+        class A:
+            @types(Z)
+            def __init__(self, z): pass
         class B: pass
         class BImpl(B):
             @types([A])
@@ -246,6 +249,7 @@ class TestDI(TestCase):
             def __init(self, a): pass
         di = DI()
         di.log = self
+        di.add(Z)
         di.add(A)
         di.add(BImpl)
         di.add(C)
@@ -254,6 +258,8 @@ class TestDI(TestCase):
             ("%s Request: %s%s", '>', 'diapyr.test_diapyr.C', ''),
             ("%s Request: %s%s", '>>', 'diapyr.test_diapyr.BImpl', '(diapyr.test_diapyr.B)'),
             ("%s Request: %s%s", '>>>', 'diapyr.test_diapyr.A', ''),
+            ('%s Request: %s%s', '>>>>', 'diapyr.test_diapyr.Z', ''),
+            ('%s %s: %s', '>>>>', 'Instantiate', 'diapyr.test_diapyr.Z'),
             ("%s %s: %s", '>>>', 'Instantiate', 'diapyr.test_diapyr.A'),
             ("%s %s: %s", '>>', 'Instantiate', 'diapyr.test_diapyr.BImpl'),
             ("%s %s: %s", '>', 'Instantiate', 'diapyr.test_diapyr.C'),
