@@ -467,26 +467,35 @@ self.assertEqual(['woo', log], di(int))''')
         class B(D):
             @types(A)
             def __init__(self, a): self.a = a
+        class C(D):
+            @types(B)
+            def __init__(self, b): self.b = b
         with DI() as di:
             di.log = self
             di.add(A)
+            di.add(C)
             with DI(di) as subdi:
                 subdi.log = self
                 subdi.add(B)
                 subdi.join(B, False)
+                c = di(C)
                 b = di(B)
                 a = di(A)
+                self.assertIs(c.b, b)
                 self.assertIs(b.a, a)
                 self.assertIs(b, subdi(B))
                 self.assertFalse(disposed)
             self.assertEqual([b], disposed)
-        self.assertEqual([b, a], disposed)
+        self.assertEqual([b, c, a], disposed)
         self.assertEqual([
+            ('%s Request: %s%s', '>', 'diapyr.test_diapyr.C', ''),
             ('%s Request: %s%s', '>', 'diapyr.test_diapyr.B', ''),
             ('%s Request: %s%s', '>>', 'diapyr.test_diapyr.A', ''),
             ('%s %s: %s', '>>', 'Instantiate', 'diapyr.test_diapyr.A'),
             ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.B'),
+            ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.C'),
             ('Dispose: %s', 'diapyr.test_diapyr.B'),
+            ('Dispose: %s', 'diapyr.test_diapyr.C'),
             ('Dispose: %s', 'diapyr.test_diapyr.A'),
         ], self.debugs)
 
@@ -501,25 +510,34 @@ self.assertEqual(['woo', log], di(int))''')
         class B(D):
             @types(A)
             def __init__(self, a): self.a = a
+        class C(D):
+            @types(B)
+            def __init__(self, b): self.b = b
         with DI() as di:
             di.log = self
             di.add(A)
+            di.add(C)
             subdi = DI(di)
             subdi.log = self
             subdi.add(B)
             subdi.join(B)
+            c = di(C)
             b = di(B)
             a = di(A)
+            self.assertIs(c.b, b)
             self.assertIs(b.a, a)
             self.assertIs(b, subdi(B))
             self.assertFalse(disposed)
-        self.assertEqual([b, a], disposed)
+        self.assertEqual([b, c, a], disposed)
         self.assertEqual([
+            ('%s Request: %s%s', '>', 'diapyr.test_diapyr.C', ''),
             ('%s Request: %s%s', '>', 'diapyr.test_diapyr.B', ''),
             ('%s Request: %s%s', '>>', 'diapyr.test_diapyr.A', ''),
             ('%s %s: %s', '>>', 'Instantiate', 'diapyr.test_diapyr.A'),
             ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.B'),
+            ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.C'),
             ('Dispose: %s', 'diapyr.test_diapyr.B'),
+            ('Dispose: %s', 'diapyr.test_diapyr.C'),
             ('Dispose: %s', 'diapyr.test_diapyr.A'),
         ], self.debugs)
 
