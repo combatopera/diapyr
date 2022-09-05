@@ -478,66 +478,58 @@ class TestProxy(TestCase):
     def setUp(self):
         self.debugs = []
         self.disposed = []
+        class D:
+            def dispose(this): self.disposed.append(this)
+        class A(D):
+            @types()
+            def __init__(self): pass
+        class B(D):
+            @types(A)
+            def __init__(self, a): self.a = a
+        class C(D):
+            @types(B)
+            def __init__(self, b): self.b = b
+        self.A = A
+        self.B = B
+        self.C = C
 
     def debug(self, *args):
         self.debugs.append(args)
 
     def test_exitcontext(self):
-        class D:
-            def dispose(this): self.disposed.append(this)
-        class A(D):
-            @types()
-            def __init__(self): pass
-        class B(D):
-            @types(A)
-            def __init__(self, a): self.a = a
-        class C(D):
-            @types(B)
-            def __init__(self, b): self.b = b
         with DI() as di:
             di.log = self
-            di.add(A)
-            di.add(C)
+            di.add(self.A)
+            di.add(self.C)
             with DI(di) as subdi:
                 subdi.log = self
-                subdi.add(B)
-                subdi.join(B, False)
-                c = di(C)
-                b = di(B)
-                a = di(A)
+                subdi.add(self.B)
+                subdi.join(self.B, False)
+                c = di(self.C)
+                b = di(self.B)
+                a = di(self.A)
                 self.assertIs(c.b, b)
                 self.assertIs(b.a, a)
-                self.assertIs(b, subdi(B))
+                self.assertIs(b, subdi(self.B))
                 self.assertFalse(self.disposed)
             self.assertEqual([b], self.disposed)
         self.assertEqual([b, c, a], self.disposed)
 
     def test_discardall(self):
-        class D:
-            def dispose(this): self.disposed.append(this)
-        class A(D):
-            @types()
-            def __init__(self): pass
-        class B(D):
-            @types(A)
-            def __init__(self, a): self.a = a
-        class C(D):
-            @types(B)
-            def __init__(self, b): self.b = b
         with DI() as di:
             di.log = self
-            di.add(A)
-            di.add(C)
+            di.add(self.A)
+            di.add(self.C)
             subdi = DI(di)
             subdi.log = self
-            subdi.add(B)
-            subdi.join(B)
-            c = di(C)
-            b = di(B)
-            a = di(A)
+            subdi.add(self.B)
+            subdi.join(self.B)
+            c = di(self.C)
+            b = di(self.B)
+            a = di(self.A)
             self.assertIs(c.b, b)
             self.assertIs(b.a, a)
-            self.assertIs(b, subdi(B))
+            self.assertIs(b, subdi(self.B))
             self.assertFalse(self.disposed)
         self.assertEqual([b, c, a], self.disposed)
 
