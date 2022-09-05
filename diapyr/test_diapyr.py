@@ -456,7 +456,26 @@ self.assertEqual(['woo', log], di(int))''')
             raise x
         self.assertIs(x, c.x)
 
-    def test_proxy(self):
+    def test_lastresort(self):
+        log = object()
+        class L: pass
+        class A:
+            @types(L)
+            def __init__(self, log = log):
+                self.log = log
+        with DI() as di:
+            with DI(di) as di2:
+                di2.add(A)
+                self.assertIs(log, di2(A).log)
+            l = L()
+            di.add(l)
+            with DI(di) as di3:
+                di3.add(A)
+                self.assertIs(l, di3(A).log)
+
+class TestProxy(TestCase):
+
+    def test_exitcontext(self):
         self.debugs = []
         disposed = []
         class D:
@@ -499,7 +518,7 @@ self.assertEqual(['woo', log], di(int))''')
             ('Dispose: %s', 'diapyr.test_diapyr.A'),
         ], self.debugs)
 
-    def test_proxy2(self):
+    def test_discardall(self):
         self.debugs = []
         disposed = []
         class D:
@@ -540,20 +559,3 @@ self.assertEqual(['woo', log], di(int))''')
             ('Dispose: %s', 'diapyr.test_diapyr.C'),
             ('Dispose: %s', 'diapyr.test_diapyr.A'),
         ], self.debugs)
-
-    def test_lastresort(self):
-        log = object()
-        class L: pass
-        class A:
-            @types(L)
-            def __init__(self, log = log):
-                self.log = log
-        with DI() as di:
-            with DI(di) as di2:
-                di2.add(A)
-                self.assertIs(log, di2(A).log)
-            l = L()
-            di.add(l)
-            with DI(di) as di3:
-                di3.add(A)
-                self.assertIs(l, di3(A).log)
