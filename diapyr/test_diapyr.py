@@ -28,9 +28,14 @@ def _add(di, obj):
     di.add(obj)
     return methods
 
-class TestDI(TestCase):
+class DebugCase(TestCase):
 
     maxDiff = None
+
+    def debug(self, *args):
+        self.debugs.append(args)
+
+class TestDI(DebugCase):
 
     def test_instances(self):
         class Basestring:
@@ -205,9 +210,6 @@ class TestDI(TestCase):
         class BadStopException(Exception): pass
 
         def stop(self): raise self.BadStopException
-
-    def debug(self, *args):
-        self.debugs.append(args)
 
     def error(self, *args, **kwargs):
         self.errors.append([args, kwargs])
@@ -479,7 +481,7 @@ self.assertEqual(['woo', log], di(int))''')
                 di3.add(A)
                 self.assertIs(l, di3(A).log)
 
-class TestProxy(TestCase):
+class TestProxy(DebugCase):
 
     def setUp(self):
         self.debugs = []
@@ -498,9 +500,6 @@ class TestProxy(TestCase):
         self.A = A
         self.B = B
         self.C = C
-
-    def debug(self, *args):
-        self.debugs.append(args)
 
     def test_exitcontext(self):
         with DI() as di:
