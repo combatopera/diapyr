@@ -475,11 +475,16 @@ self.assertEqual(['woo', log], di(int))''')
 
 class TestProxy(TestCase):
 
-    def test_exitcontext(self):
+    def setUp(self):
         self.debugs = []
-        disposed = []
+        self.disposed = []
+
+    def debug(self, *args):
+        self.debugs.append(args)
+
+    def test_exitcontext(self):
         class D:
-            def dispose(self): disposed.append(self)
+            def dispose(this): self.disposed.append(this)
         class A(D):
             @types()
             def __init__(self): pass
@@ -503,26 +508,13 @@ class TestProxy(TestCase):
                 self.assertIs(c.b, b)
                 self.assertIs(b.a, a)
                 self.assertIs(b, subdi(B))
-                self.assertFalse(disposed)
-            self.assertEqual([b], disposed)
-        self.assertEqual([b, c, a], disposed)
-        self.assertEqual([
-            ('%s Request: %s%s', '>', 'diapyr.test_diapyr.C', ''),
-            ('%s Request: %s%s', '>', 'diapyr.test_diapyr.B', ''),
-            ('%s Request: %s%s', '>>', 'diapyr.test_diapyr.A', ''),
-            ('%s %s: %s', '>>', 'Instantiate', 'diapyr.test_diapyr.A'),
-            ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.B'),
-            ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.C'),
-            ('Dispose: %s', 'diapyr.test_diapyr.B'),
-            ('Dispose: %s', 'diapyr.test_diapyr.C'),
-            ('Dispose: %s', 'diapyr.test_diapyr.A'),
-        ], self.debugs)
+                self.assertFalse(self.disposed)
+            self.assertEqual([b], self.disposed)
+        self.assertEqual([b, c, a], self.disposed)
 
     def test_discardall(self):
-        self.debugs = []
-        disposed = []
         class D:
-            def dispose(self): disposed.append(self)
+            def dispose(this): self.disposed.append(this)
         class A(D):
             @types()
             def __init__(self): pass
@@ -546,8 +538,10 @@ class TestProxy(TestCase):
             self.assertIs(c.b, b)
             self.assertIs(b.a, a)
             self.assertIs(b, subdi(B))
-            self.assertFalse(disposed)
-        self.assertEqual([b, c, a], disposed)
+            self.assertFalse(self.disposed)
+        self.assertEqual([b, c, a], self.disposed)
+
+    def tearDown(self):
         self.assertEqual([
             ('%s Request: %s%s', '>', 'diapyr.test_diapyr.C', ''),
             ('%s Request: %s%s', '>', 'diapyr.test_diapyr.B', ''),
