@@ -483,6 +483,8 @@ self.assertEqual(['woo', log], di(int))''')
 
 class TestProxy(DebugCase):
 
+    class B: pass
+
     def setUp(self):
         self.debugs = []
         self.disposed = []
@@ -491,14 +493,14 @@ class TestProxy(DebugCase):
         class A(D):
             @types()
             def __init__(self): pass
-        class B(D):
+        class BImpl(D, self.B):
             @types(A)
             def __init__(self, a): self.a = a
         class C(D):
-            @types(B)
+            @types(self.B)
             def __init__(self, b): self.b = b
         self.A = A
-        self.B = B
+        self.BImpl = BImpl
         self.C = C
 
     def test_exitcontext(self):
@@ -508,8 +510,8 @@ class TestProxy(DebugCase):
             di.add(self.C)
             with DI(di) as subdi:
                 subdi.log = self
-                subdi.add(self.B)
-                subdi.join(self.B, False)
+                subdi.add(self.BImpl)
+                subdi.join(self.BImpl, False)
                 c = di(self.C)
                 b = di(self.B)
                 a = di(self.A)
@@ -527,8 +529,8 @@ class TestProxy(DebugCase):
             di.add(self.C)
             subdi = DI(di)
             subdi.log = self
-            subdi.add(self.B)
-            subdi.join(self.B)
+            subdi.add(self.BImpl)
+            subdi.join(self.BImpl)
             c = di(self.C)
             b = di(self.B)
             a = di(self.A)
@@ -541,12 +543,12 @@ class TestProxy(DebugCase):
     def tearDown(self):
         self.assertEqual([
             ('%s Request: %s%s', '>', 'diapyr.test_diapyr.C', ''),
-            ('%s Request: %s%s', '>', 'diapyr.test_diapyr.B', ''),
+            ('%s Request: %s%s', '>', 'diapyr.test_diapyr.BImpl', ''), # FIXME: Trigger not logged.
             ('%s Request: %s%s', '>>', 'diapyr.test_diapyr.A', ''),
             ('%s %s: %s', '>>', 'Instantiate', 'diapyr.test_diapyr.A'),
-            ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.B'),
+            ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.BImpl'),
             ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.C'),
-            ('Dispose: %s', 'diapyr.test_diapyr.B'),
+            ('Dispose: %s', 'diapyr.test_diapyr.BImpl'),
             ('Dispose: %s', 'diapyr.test_diapyr.C'),
             ('Dispose: %s', 'diapyr.test_diapyr.A'),
         ], self.debugs)
