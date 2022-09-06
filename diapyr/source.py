@@ -16,7 +16,7 @@
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
 from .iface import Special, unset
-from .match import wrap
+from .match import ExactMatch, wrap
 from .util import innerclass
 try:
     from inspect import getfullargspec as getargspec
@@ -43,21 +43,29 @@ class Instance(Source):
         super(Instance, self).__init__(type)
         self.instance = instance
 
-    def make(self, depth, trigger):
-        return self.instance
+    def plan(self, depth, trigger):
+        pass
 
     def discard(self):
         pass # TODO: Test this if possible.
 
 class Proxy(Source):
 
+    @property
+    def instance(self):
+        return self._othersource().instance
+
     def __init__(self, otherdi, type, discardall):
         super(Proxy, self).__init__(type)
         self.otherdi = otherdi
         self.discardall = discardall
 
-    def make(self, depth, trigger):
-        return self.otherdi(self.type)
+    def _othersource(self):
+        s, = ExactMatch(self.type).getsources(self.otherdi)
+        return s
+
+    def plan(self, depth, trigger):
+        return self._othersource().plan(depth, trigger)
 
     def discard(self):
         if self.discardall:
@@ -72,18 +80,18 @@ class Creator(Source):
         self.instantiator = instantiator
         self.di = di
 
-    def make(self, depth, trigger):
+    def plan(self, depth, trigger):
         if self.instance is unset:
             self.di.log.debug("%s Request: %s%s", depth, self.typelabel, '' if trigger == self.type else "(%s)" % Special.gettypelabel(trigger))
-            plan = self.instantiator.Plan("%s%s" % (depth, self.di.depthunit))
-            self.di.log.debug("%s %s: %s", depth, type(self.instantiator).__name__, self.typelabel)
-            self.instance = plan.fire(depth)
-        return self.instance
+            return self.instantiator.Plan(depth)
 
-    def toargs(self, depth, deptypes, defaults):
+    def setinstance(self, instance):
+        self.instance = instance
+
+    def toargs(self, deptypes, defaults):
         if defaults is None:
             defaults = ()
-        return [t.di_get(self.di, default, depth) for t, default in zip(deptypes, chain(repeat(unset, len(deptypes) - len(defaults)), defaults))]
+        return [t.di_get(self.di, default) for t, default in zip(deptypes, chain(repeat(unset, len(deptypes) - len(defaults)), defaults))]
 
     def discard(self):
         instance, self.instance = self.instance, unset
@@ -95,6 +103,15 @@ class Creator(Source):
             else:
                 self.di.log.debug("Dispose: %s", self.typelabel)
                 dispose()
+
+class CreatorPlan(object):
+
+    def __init__(self, depth):
+        self.depth = depth
+
+    def make(self):
+        self.di.log.debug("%s %s: %s", self.depth, type(self.instantiator).__name__, self.typelabel)
+        self.setinstance(self.fire())
 
 class Class(Creator):
 
@@ -109,9 +126,18 @@ class Class(Creator):
             self.cls = cls
 
         @innerclass
-        class Plan(object):
+        class Plan(CreatorPlan):
+
+            @property
+            def args(self):
+                for a in self.ctorargs:
+                    yield a
+                for _, eargs in self.enhancers:
+                    for a in eargs:
+                        yield a
 
             def __init__(self, depth):
+                CreatorPlan.__init__(self, depth)
                 ctor = self.cls.__init__
                 methods = {}
                 for name in dir(self.cls):
@@ -119,7 +145,7 @@ class Class(Creator):
                         m = getattr(self.cls, name)
                         if hasattr(m, 'di_deptypes') and not hasattr(m, 'di_owntype'):
                             methods[name] = m
-                self.ctorargs = self.toargs(depth, ctor.di_deptypes, getargspec(ctor).defaults)
+                self.ctorargs = self.toargs(ctor.di_deptypes, getargspec(ctor).defaults)
                 self.enhancers = []
                 if methods:
                     for ancestor in reversed(self.cls.mro()):
@@ -129,14 +155,14 @@ class Class(Creator):
                             except KeyError:
                                 pass
                             else:
-                                self.enhancers.append([m, self.toargs(depth, m.di_deptypes, getargspec(m).defaults)])
+                                self.enhancers.append([m, self.toargs(m.di_deptypes, getargspec(m).defaults)])
 
-            def fire(self, depth):
-                instance = self.cls(*self.ctorargs)
+            def fire(self):
+                instance = self.cls(*(a.resolve() for a in self.ctorargs))
                 if self.enhancers:
-                    self.di.log.debug("%s Enhance: %s", depth, self.typelabel)
+                    self.di.log.debug("%s Enhance: %s", self.depth, self.typelabel)
                     for m, eargs in self.enhancers:
-                        m(instance, *eargs)
+                        m(instance, *(a.resolve() for a in eargs))
                 return instance
 
     def __init__(self, cls, di):
@@ -155,13 +181,14 @@ class Factory(Creator):
             self.function = function
 
         @innerclass
-        class Plan(object):
+        class Plan(CreatorPlan):
 
             def __init__(self, depth):
-                self.args = self.toargs(depth, self.function.di_deptypes, getargspec(self.function).defaults)
+                CreatorPlan.__init__(self, depth)
+                self.args = self.toargs(self.function.di_deptypes, getargspec(self.function).defaults)
 
-            def fire(self, depth):
-                return self.function(*self.args)
+            def fire(self):
+                return self.function(*(a.resolve() for a in self.args))
 
     def __init__(self, function, di):
         super(Factory, self).__init__(self.Fabricate(function), di)
@@ -180,13 +207,14 @@ class Builder(Creator):
             self.method = method
 
         @innerclass
-        class Plan(object):
+        class Plan(CreatorPlan):
 
             def __init__(self, depth):
-                self.args = self.toargs(depth, (self.receivermatch,) + self.method.di_deptypes, getargspec(self.method).defaults)
+                CreatorPlan.__init__(self, depth)
+                self.args = self.toargs((self.receivermatch,) + self.method.di_deptypes, getargspec(self.method).defaults)
 
-            def fire(self, depth):
-                return self.method(*self.args)
+            def fire(self):
+                return self.method(*(a.resolve() for a in self.args))
 
     def __init__(self, receivertype, method, di):
         super(Builder, self).__init__(self.Build(receivertype, method), di)

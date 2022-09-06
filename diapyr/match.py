@@ -17,6 +17,38 @@
 
 from .iface import UnsatisfiableRequestException, unset
 
+class DefaultArg:
+
+    sources = ()
+
+    def __init__(self, default):
+        self.default = default
+
+    def resolve(self):
+        return self.default
+
+class SourceArg:
+
+    @property
+    def sources(self):
+        yield self.source
+
+    def __init__(self, source, trigger):
+        self.source = source
+        self.trigger = trigger
+
+    def resolve(self):
+        return self.source.instance
+
+class ListArg:
+
+    def __init__(self, sources, trigger):
+        self.sources = sources
+        self.trigger = trigger
+
+    def resolve(self):
+        return [s.instance for s in self.sources]
+
 class BaseGetAll:
 
     def __init__(self, clazz):
@@ -32,21 +64,21 @@ class GetAll(BaseGetAll):
 
 class AllInstancesOf(GetAll):
 
-    def di_get(self, di, default, depth):
-        return [s.make(depth, self.clazz) for s in self.getsources(di)]
+    def di_get(self, di, default):
+        return ListArg(self.getsources(di), self.clazz)
 
 class One:
 
-    def di_get(self, di, default, depth):
+    def di_get(self, di, default):
         sources = self.getsources(di)
         if not sources:
             if di.parent is not None:
-                return self.di_get(di.parent, default, depth) # XXX: Is parent thread-safe?
+                return self.di_get(di.parent, default) # XXX: Is parent thread-safe?
             if default is not unset:
-                return default
+                return DefaultArg(default)
         if 1 != len(sources):
             raise UnsatisfiableRequestException("Expected 1 object of type %s but got: %s" % (self.clazz, len(sources)))
-        return sources[0].make(depth, self.clazz)
+        return SourceArg(sources[0], self.clazz)
 
 class OneInstanceOf(GetAll, One): pass
 

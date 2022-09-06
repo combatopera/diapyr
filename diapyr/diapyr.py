@@ -19,12 +19,20 @@ from .iface import MissingAnnotationException, unset
 from .match import AllInstancesOf, wrap
 from .source import Builder, Class, Factory, Instance, Proxy
 from .start import starter
-from .util import invokeall
-from collections import defaultdict
+from .util import invokeall, singleton
+from collections import defaultdict, OrderedDict
 import logging
 
 log = logging.getLogger(__name__)
 typeitself = type
+
+@singleton
+class NullPlan:
+
+    args = ()
+
+    def make(self):
+        pass
 
 def types(*deptypes, **kwargs):
     def g(f):
@@ -110,7 +118,26 @@ class DI:
         return self._session(wrap(clazz))
 
     def _session(self, match):
-        return match.di_get(self, unset, self.depthunit)
+        root = match.di_get(self, unset)
+        depth = self.depthunit
+        plans = OrderedDict()
+        args = [root]
+        while args:
+            nextargs = []
+            for a in args:
+                for s in a.sources:
+                    if s not in plans:
+                        p = s.plan(depth, a.trigger)
+                        if p is None:
+                            p = NullPlan
+                        plans[s] = p
+                        nextargs.extend(p.args)
+            args = nextargs
+            depth = "%s%s" % (depth, self.depthunit)
+        while plans:
+            for s in [s for s in plans if not any(r in plans for a in plans[s].args for r in a.sources)]:
+                plans.pop(s).make()
+        return root.resolve()
 
     def join(self, type, discardall = True):
         self.parent.addsource(Proxy(self, type, discardall))

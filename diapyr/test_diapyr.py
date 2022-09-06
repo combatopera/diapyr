@@ -259,10 +259,10 @@ class TestDI(DebugCase):
         self.assertEqual([
             ("%s Request: %s%s", '>', 'diapyr.test_diapyr.C', ''),
             ("%s Request: %s%s", '>>', 'diapyr.test_diapyr.BImpl', '(diapyr.test_diapyr.B)'),
-            ("%s Request: %s%s", '>>>', 'diapyr.test_diapyr.A', ''),
-            ('%s Request: %s%s', '>>>>', 'diapyr.test_diapyr.Z', ''),
-            ('%s %s: %s', '>>>>', 'Instantiate', 'diapyr.test_diapyr.Z'),
-            ("%s %s: %s", '>>>', 'Instantiate', 'diapyr.test_diapyr.A'),
+            ("%s Request: %s%s", '>>', 'diapyr.test_diapyr.A', ''),
+            ('%s Request: %s%s', '>>>', 'diapyr.test_diapyr.Z', ''),
+            ('%s %s: %s', '>>>', 'Instantiate', 'diapyr.test_diapyr.Z'),
+            ("%s %s: %s", '>>', 'Instantiate', 'diapyr.test_diapyr.A'),
             ("%s %s: %s", '>>', 'Instantiate', 'diapyr.test_diapyr.BImpl'),
             ("%s %s: %s", '>', 'Instantiate', 'diapyr.test_diapyr.C'),
             ("%s Enhance: %s", '>', 'diapyr.test_diapyr.C'),
@@ -543,10 +543,10 @@ class TestProxy(DebugCase):
     def tearDown(self):
         self.assertEqual([
             ('%s Request: %s%s', '>', 'diapyr.test_diapyr.C', ''),
-            ('%s Request: %s%s', '>', 'diapyr.test_diapyr.BImpl', ''), # FIXME: Trigger not logged.
-            ('%s Request: %s%s', '>>', 'diapyr.test_diapyr.A', ''),
-            ('%s %s: %s', '>>', 'Instantiate', 'diapyr.test_diapyr.A'),
-            ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.BImpl'),
+            ('%s Request: %s%s', '>>', 'diapyr.test_diapyr.BImpl', '(diapyr.test_diapyr.B)'),
+            ('%s Request: %s%s', '>>>', 'diapyr.test_diapyr.A', ''),
+            ('%s %s: %s', '>>>', 'Instantiate', 'diapyr.test_diapyr.A'),
+            ('%s %s: %s', '>>', 'Instantiate', 'diapyr.test_diapyr.BImpl'),
             ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.C'),
             ('Dispose: %s', 'diapyr.test_diapyr.BImpl'),
             ('Dispose: %s', 'diapyr.test_diapyr.C'),
