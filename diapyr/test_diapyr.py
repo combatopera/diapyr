@@ -268,6 +268,38 @@ class TestDI(DebugCase):
             ("%s Enhance: %s", '>', 'diapyr.test_diapyr.C'),
         ], self.debugs)
 
+    def test_diamond(self):
+        self.debugs = []
+        class A:
+            @types()
+            def __init__(self): pass
+        class B:
+            @types(A)
+            def __init__(self, a): pass
+        class C:
+            @types(A)
+            def __init__(self, a): pass
+        class D:
+            @types(B, C)
+            def __init__(self, b, c): pass
+        with DI() as di:
+            di.log = self
+            di.add(A)
+            di.add(B)
+            di.add(C)
+            di.add(D)
+            di(D)
+        self.assertEqual([
+            ('%s Request: %s%s', '>', 'diapyr.test_diapyr.D', ''),
+            ('%s Request: %s%s', '>>', 'diapyr.test_diapyr.B', ''),
+            ('%s Request: %s%s', '>>', 'diapyr.test_diapyr.C', ''),
+            ('%s Request: %s%s', '>>>', 'diapyr.test_diapyr.A', ''),
+            ('%s %s: %s', '>>>', 'Instantiate', 'diapyr.test_diapyr.A'),
+            ('%s %s: %s', '>>', 'Instantiate', 'diapyr.test_diapyr.B'),
+            ('%s %s: %s', '>>', 'Instantiate', 'diapyr.test_diapyr.C'),
+            ('%s %s: %s', '>', 'Instantiate', 'diapyr.test_diapyr.D'),
+        ], self.debugs)
+
     def test_child(self):
         class A:
             @types()
