@@ -17,7 +17,7 @@
 
 from __future__ import division
 from .diapyr import DI, types
-from .iface import MissingAnnotationException, UnsatisfiableRequestException
+from .iface import ImpasseException, MissingAnnotationException, UnsatisfiableRequestException
 from .start import Started
 from .util import ispy2
 from unittest import TestCase
@@ -512,6 +512,22 @@ self.assertEqual(['woo', log], di(int))''')
             with DI(di) as di3:
                 di3.add(A)
                 self.assertIs(l, di3(A).log)
+
+    def test_circular(self):
+        class B: pass
+        class A:
+            @types(B)
+            def __init__(self, b): pass
+        class BImpl(B):
+            @types(A)
+            def __init__(self, a): pass
+        di = DI()
+        di.add(A)
+        di.add(BImpl)
+        with self.assertRaises(ImpasseException):
+            di(A)
+        with self.assertRaises(ImpasseException):
+            di(B)
 
 class TestProxy(DebugCase):
 

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-from .iface import MissingAnnotationException, unset
+from .iface import ImpasseException, MissingAnnotationException, unset
 from .match import AllInstancesOf, wrap
 from .source import Builder, Class, Factory, Instance, Proxy
 from .start import starter
@@ -135,7 +135,10 @@ class DI:
             args = nextargs
             depth = "%s%s" % (depth, self.depthunit)
         while plans:
-            for s in [s for s in plans if not any(r in plans for a in plans[s].args for r in a.sources)]:
+            sources = [s for s in plans if not any(r in plans for a in plans[s].args for r in a.sources)]
+            if not sources:
+                raise ImpasseException
+            for s in sources:
                 plans.pop(s).make()
         return root.resolve()
 

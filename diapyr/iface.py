@@ -26,4 +26,6 @@ class Special(object):
 
 class UnsatisfiableRequestException(Exception): pass
 
+class ImpasseException(Exception): pass
+
 unset = object()
