@@ -15,9 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with diapyr.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
+import os, sys
 
 ispy2 = sys.version_info.major < 3
+PYTHONPATH = os.pathsep.join(sys.path[1:])
 
 class Proxy(object):
 
