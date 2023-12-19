@@ -181,3 +181,53 @@ class TestInvokeAll(TestCase):
         if not ispy2:
             self.assertIs(e2, cm.exception.__context__)
             self.assertIs(e1, cm.exception.__context__.__context__)
+
+    class X(Exception): pass
+
+    class Y(Exception): pass
+
+    def _existingcontext(self, f):
+        with self.assertRaises(self.Y) as cm:
+            f()
+        if not ispy2:
+            self.assertIsInstance(cm.exception.__context__, KeyError)
+            self.assertIsInstance(cm.exception.__context__.__context__, self.X)
+            self.assertIsInstance(cm.exception.__context__.__context__.__context__, IndexError)
+            self.assertIs(None, cm.exception.__context__.__context__.__context__.__context__)
+
+    def test_existingcontextflat(self):
+        def f():
+            try:
+                [][0]
+            except:
+                try:
+                    raise self.X
+                except:
+                    try:
+                        {}[0]
+                    except:
+                        raise self.Y
+        self._existingcontext(f)
+
+    def test_existingcontext(self):
+        def f():
+            try:
+                [][0]
+            except:
+                raise self.X
+        def g():
+            try:
+                {}[0]
+            except:
+                raise self.Y
+        with self.assertRaises(self.X) as cm:
+            f()
+        if not ispy2:
+            self.assertIsInstance(cm.exception.__context__, IndexError)
+            self.assertIs(None, cm.exception.__context__.__context__)
+        with self.assertRaises(self.Y) as cm:
+            g()
+        if not ispy2:
+            self.assertIsInstance(cm.exception.__context__, KeyError)
+            self.assertIs(None, cm.exception.__context__.__context__)
+        self._existingcontext(lambda: invokeall([f, g]))
