@@ -231,3 +231,20 @@ class TestInvokeAll(TestCase):
             self.assertIsInstance(cm.exception.__context__, KeyError)
             self.assertIs(None, cm.exception.__context__.__context__)
         self._existingcontext(lambda: invokeall([f, g]))
+
+    def test_rethrowwithcontext(self):
+        if ispy2:
+            return
+        from concurrent.futures import ThreadPoolExecutor
+        def f():
+            try:
+                [][0]
+            except:
+                raise self.X
+        def g():
+            try:
+                {}[0]
+            except:
+                raise self.Y
+        with ThreadPoolExecutor() as e:
+            self._existingcontext(lambda: invokeall([e.submit(x).result for x in [f, g]]))
