@@ -78,18 +78,26 @@ def enum(*lists):
         return cls
     return d
 
+def _rootcontext(e):
+    while True:
+        c = getattr(e, '__context__', None)
+        if c is None:
+            return e
+        e = c
+
 def invokeall(callables):
     '''Invoke every callable, even if one or more of them fail. This is mostly useful for synchronising with futures.
     If all succeeded return their return values as a list, otherwise raise all exceptions thrown as a chain.'''
-    def drain():
-        while i[0] < n:
-            c = callables[i[0]]
-            i[0] += 1
-            try:
-                yield c()
-            except Exception:
-                for _ in drain():
-                    pass
-                raise
-    i, n = [0], len(callables)
-    return list(drain())
+    values = []
+    failure = None
+    for c in callables:
+        try:
+            obj = c()
+        except Exception as e:
+            _rootcontext(e).__context__ = failure
+            failure = e
+        else:
+            values.append(obj)
+    if failure is None:
+        return values
+    raise failure

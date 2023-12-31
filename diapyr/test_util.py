@@ -146,9 +146,9 @@ def bad(e):
 
 class TestInvokeAll(TestCase):
 
-    def test_generator(self):
+    def test_noniterable(self):
         with self.assertRaises(TypeError):
-            invokeall(_ for _ in [])
+            invokeall(100)
 
     def test_happypath(self):
         self.assertEqual([], invokeall([]))
@@ -167,8 +167,7 @@ class TestInvokeAll(TestCase):
         with self.assertRaises(Exception) as cm:
             invokeall([partial(bad, e1), partial(good, 456), partial(bad, e2)])
         self.assertIs(e2, cm.exception)
-        if not ispy2:
-            self.assertIs(e1, cm.exception.__context__)
+        self.assertIs(e1, cm.exception.__context__)
 
     def test_3fails(self):
         e1 = Exception(1)
@@ -178,9 +177,8 @@ class TestInvokeAll(TestCase):
             invokeall([partial(bad, e1), partial(bad, e2), partial(bad, e3)])
         # When cm.exception is printed these will appear in the order they were raised:
         self.assertIs(e3, cm.exception)
-        if not ispy2:
-            self.assertIs(e2, cm.exception.__context__)
-            self.assertIs(e1, cm.exception.__context__.__context__)
+        self.assertIs(e2, cm.exception.__context__)
+        self.assertIs(e1, cm.exception.__context__.__context__)
 
     class X(Exception): pass
 
