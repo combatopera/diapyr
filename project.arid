@@ -1,4 +1,4 @@
-: Copyright 2014, 2018, 2019, 2020 Andrzej Cichocki
+: Copyright 2014, 2018, 2019, 2020, 2024 Andrzej Cichocki
 
 : This file is part of diapyr.
 :
@@ -22,6 +22,7 @@ years +=
     2018
     2019
     2020
+    2024
 pyversions +=
     3
     2
