@@ -20,7 +20,7 @@ from tempfile import NamedTemporaryFile
 from unittest import TestCase
 import os
 
-class TestSetupRoot(TestCase):
+class TestSetupHacks(TestCase):
 
     def test_getsetupkwargs(self):
         with NamedTemporaryFile('w') as setup:
